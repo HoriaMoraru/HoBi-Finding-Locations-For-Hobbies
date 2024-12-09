@@ -1,10 +1,11 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import MainPage from "./MainPage";
-import SignupPage from "./SignupPage";
+import MainPage from "./pages/MainPage";
+import SignupPage from "./pages/SignupPage";
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
   <React.StrictMode>
     <Router>
       <Routes>
@@ -12,6 +13,5 @@ ReactDOM.render(
         <Route path="/signup" element={<SignupPage />} />
       </Routes>
     </Router>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );

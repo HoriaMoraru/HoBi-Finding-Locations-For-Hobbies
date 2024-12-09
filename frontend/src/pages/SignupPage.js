@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { auth } from "./firebase";
+import { auth } from "../firebase"; // Corrected path
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import axios from "axios";
 
@@ -22,7 +22,12 @@ const SignupPage = () => {
 
       alert("Account created successfully!");
     } catch (err) {
-      setError(err.message);
+        console.error("Error during signup:", err);  // Log the error to console
+        if (err.code === 'auth/email-already-in-use') {
+            setError("The email is already in use. Please try another or log in.");
+          } else {
+            setError("Network error: Unable to create account. Please try again.");
+          }
     }
   };
 
