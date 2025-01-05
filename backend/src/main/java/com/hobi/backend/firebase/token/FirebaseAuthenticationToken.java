@@ -1,28 +1,19 @@
 package com.hobi.backend.firebase.token;
 
 import com.google.firebase.auth.FirebaseToken;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.List;
+import java.util.Objects;
 
 public class FirebaseAuthenticationToken extends AbstractAuthenticationToken {
 
-    private FirebaseToken firebaseToken;
-    private String idToken;
+    private final FirebaseToken firebaseToken;
+    private final String idToken;
 
     public FirebaseAuthenticationToken(FirebaseToken firebaseToken, String idToken) {
         super(null); // We do not need the authorities
         this.firebaseToken = firebaseToken;
         this.idToken = idToken;
-    }
-
-    public FirebaseAuthenticationToken(
-            String idToken, FirebaseToken firebaseToken, List<GrantedAuthority> authorities) {
-        super(authorities);
-        this.idToken = idToken;
-        this.firebaseToken = firebaseToken;
     }
 
     @Override
@@ -33,5 +24,19 @@ public class FirebaseAuthenticationToken extends AbstractAuthenticationToken {
     @Override
     public Object getPrincipal() {
         return firebaseToken.getUid();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        FirebaseAuthenticationToken that = (FirebaseAuthenticationToken) o;
+        return Objects.equals(firebaseToken, that.firebaseToken) && Objects.equals(idToken, that.idToken);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), firebaseToken, idToken);
     }
 }
