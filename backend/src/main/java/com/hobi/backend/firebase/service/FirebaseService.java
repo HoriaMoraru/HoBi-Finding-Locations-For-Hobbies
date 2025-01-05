@@ -9,13 +9,12 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.hobi.backend.request.CreateUserRequest;
 import com.hobi.backend.request.UpdateHobbyRequest;
 import com.hobi.backend.request.UpdateLocationRequest;
-import com.hobi.backend.user.model.Location;
+import com.hobi.backend.maps.model.Location;
 import com.hobi.backend.user.model.User;
 import com.hobi.backend.user.model.UserPreference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;

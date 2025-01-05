@@ -1,6 +1,6 @@
 package com.hobi.backend.request;
 
-import com.hobi.backend.user.model.Location;
+import com.hobi.backend.maps.model.Location;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

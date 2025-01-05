@@ -1,8 +1,7 @@
 package com.hobi.backend.controller;
 
-import com.google.type.LatLng;
+import com.hobi.backend.maps.service.MapsService;
 import com.hobi.backend.request.UpdateLocationRequest;
-import com.hobi.backend.user.model.Location;
 import com.hobi.backend.firebase.service.FirebaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class LocationController {
 
     private final FirebaseService firebaseService;
+    private final MapsService mapsService;
 
     @PostMapping("/update")
     public ResponseEntity<String> updateUserLocation(
@@ -35,4 +35,6 @@ public class LocationController {
                     .body("Failed to update location.");
         }
     }
+
+    @GetMapping("/fetch/{")
 }
