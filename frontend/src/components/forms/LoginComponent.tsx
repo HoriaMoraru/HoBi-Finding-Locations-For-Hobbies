@@ -9,7 +9,6 @@ function RegisterComponent({
 }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
 
     const emailInputRef = useRef<HTMLInputElement | null>(null);
@@ -19,11 +18,7 @@ function RegisterComponent({
             .matches(/@/, "Email doesn't match the right format.")
             .required("Email is required."),
         password: Yup.string()
-            .min(6, "Password must be at least 6 characters long.")
             .required("Password is required."),
-        confirmPassword: Yup.string()
-            .oneOf([Yup.ref("password")], "Passwords must match.")
-            .required("Password confirmation is required."),
     });
 
     useEffect(() => {
@@ -38,7 +33,6 @@ function RegisterComponent({
         const formData = {
             email,
             password,
-            confirmPassword
         };
 
         try {
@@ -63,7 +57,6 @@ function RegisterComponent({
     const resetForm = () => {
         setEmail("");
         setPassword("");
-        setConfirmPassword("");
         setErrors({});
         emailInputRef.current?.focus(); // Refocus the first input field
     };
@@ -102,20 +95,9 @@ function RegisterComponent({
                 {errors.password && <div className="invalid-feedback">{errors.password}</div>}
             </div>
 
-            <div className="mb-3">
-                <label className="form-label">Confirm Password:</label>
-                <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={handleChange(setConfirmPassword, "confirmPassword")}
-                    className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
-                />
-                {errors.confirmPassword && <div className="invalid-feedback">{errors.confirmPassword}</div>}
-            </div>
-
             <div className="d-flex justify-content-center gap-2">
                 <button type="submit" className="btn btn-primary">
-                    Sign up
+                    Log in
                 </button>
                 <button type="button" className="btn btn-secondary" onClick={resetForm}>
                     Clear
