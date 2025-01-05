@@ -8,14 +8,12 @@ import Spinner from "../../atoms/spinners/Spinner.tsx";
 const Layout: React.FC = () => {
     const { loading } = useSelector((state: RootState) => state.auth);
 
-    if (loading) {
-        return <Spinner />;
-    }
-
     return (
         <div className="app-container d-flex flex-column min-vh-100">
             <Navbar />
             <main className="flex-fill">
+                {/* Show Spinner alongside Outlet */}
+                {loading && <Spinner />}
                 <Outlet />
             </main>
         </div>

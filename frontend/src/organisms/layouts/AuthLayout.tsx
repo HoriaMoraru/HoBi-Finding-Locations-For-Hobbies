@@ -5,21 +5,20 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import Spinner from "../../atoms/spinners/Spinner.tsx";
 
-const AuthLayout: React.FC = () => {
-    const { loading } = useSelector((state: RootState) => state.auth); // Get loading state from Redux
-
-    if (loading) {
-        return <Spinner />;
-    }
+const AuthLayout: React.FC = React.memo(() => {
+    const { loading } = useSelector((state: RootState) => state.auth);
 
     return (
         <div className="d-flex flex-grow-1">
             <LeftPanel />
             <div className="flex-grow-1 p-3">
+                {loading && <Spinner />}
                 <Outlet />
             </div>
         </div>
     );
-};
+});
+
+
 
 export default AuthLayout;

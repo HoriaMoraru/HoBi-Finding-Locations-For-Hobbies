@@ -30,6 +30,17 @@ const LeftPanel: React.FC = () => {
             >
                 Hobbies
             </Link>
+            <Link
+                to="/explore"
+                className={`btn w-100 ${
+                    location.pathname === "/explore"
+                        ? "btn-secondary"
+                        : "btn-outline-secondary"
+                }`}
+                aria-label="Navigate to Map"
+            >
+                Map
+            </Link>
         </div>
     );
 };

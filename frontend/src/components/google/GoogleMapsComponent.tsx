@@ -1,118 +1,69 @@
-// GoogleMapsComponent.tsx
-
-import React, { useEffect, useState, useRef } from "react";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
-import { googleMapsConfig, GOOGLE_MAPS_LIBRARIES } from "../../config/googleMapsConfig";
+import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import {googleMapsConfig} from "../../config/googleMapsConfig.ts";
 
 const mapContainerStyle = {
     width: "100%",
-    height: "500px",
+    height: "100%",
 };
 
-const defaultLocation = {
-    lat: 37.7749, // Default latitude (San Francisco)
-    lng: -122.4194, // Default longitude
-};
-
-interface MapState {
-    center: { lat: number; lng: number };
-    zoom: number;
+interface LatLng {
+    lat: number | null;
+    lng: number | null;
 }
 
-const GoogleMapsComponent: React.FC = () => {
-    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(() => {
-        const storedLocation = localStorage.getItem("userLocation");
-        return storedLocation ? JSON.parse(storedLocation) : null;
+interface GoogleMapsComponentProps {
+    center: LatLng;
+    markerLocation: LatLng;
+    setMarkerLocation: React.Dispatch<React.SetStateAction<LatLng>>;
+}
+
+const GoogleMapsComponent: React.FC<GoogleMapsComponentProps> = ({
+                                                                     center,
+                                                                     markerLocation,
+                                                                     setMarkerLocation,
+                                                                 }) => {
+    // Load Google Maps API
+    const { isLoaded, loadError } = useLoadScript({
+        googleMapsApiKey: googleMapsConfig.apiKey, // Replace with your API key
+        libraries: ["places"], // Include required libraries
     });
-    const [mapState, setMapState] = useState<MapState>(() => {
-        const storedState = localStorage.getItem("mapState");
-        return storedState
-            ? JSON.parse(storedState)
-            : { center: defaultLocation, zoom: 12 };
-    });
-    const mapRef = useRef<google.maps.Map | null>(null);
 
-    // Fetch user's current location
-    useEffect(() => {
-        if (!userLocation && navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    const location = { lat: latitude, lng: longitude };
-                    console.log("Fetched user location:", location);
-                    setUserLocation(location);
-                    localStorage.setItem("userLocation", JSON.stringify(location));
-
-                    // Center map on user's location only if it's the first fetch
-                    if (
-                        mapState.center.lat === defaultLocation.lat &&
-                        mapState.center.lng === defaultLocation.lng
-                    ) {
-                        setMapState((prevState) => ({
-                            ...prevState,
-                            center: location,
-                        }));
-                    }
-                },
-                (error) => {
-                    console.error("Error fetching location:", error);
-                }
-            );
-        }
-    }, [userLocation, mapState.center.lat, mapState.center.lng]);
-
-    // Update map center when userLocation changes
-    useEffect(() => {
-        if (userLocation) {
-            setMapState((prevState) => ({
-                ...prevState,
-                center: userLocation,
-            }));
-        }
-    }, [userLocation]);
-
-    // Save map state when map becomes idle
-    const handleMapIdle = () => {
-        const map = mapRef.current;
-        if (map) {
-            const center = map.getCenter();
-            const zoom = map.getZoom();
-
-            if (center && zoom !== undefined) {
-                const newState: MapState = {
-                    center: { lat: center.lat(), lng: center.lng() },
-                    zoom,
-                };
-                console.log("Saving map state:", newState);
-                setMapState(newState);
-                localStorage.setItem("mapState", JSON.stringify(newState));
-            }
+    // Ensure marker location is updated on map click
+    const handleMapClick = (event: google.maps.MapMouseEvent) => {
+        if (event.latLng) {
+            setMarkerLocation({
+                lat: event.latLng.lat(),
+                lng: event.latLng.lng(),
+            });
         }
     };
 
+    if (loadError) {
+        console.error("Error loading Google Maps API:", loadError);
+        return <div>Error loading Google Maps API</div>;
+    }
+
+    if (!isLoaded || center.lat === null || center.lng === null) {
+        return <div>Loading map...</div>;
+    }
+
     return (
-        <LoadScript
-            googleMapsApiKey={googleMapsConfig.apiKey}
-            libraries={GOOGLE_MAPS_LIBRARIES}
+        <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            zoom={15}
+            center={{ lat: center.lat, lng: center.lng }}
+            onClick={handleMapClick}
         >
-            <GoogleMap
-                mapContainerStyle={mapContainerStyle}
-                center={mapState.center}
-                zoom={mapState.zoom}
-                onLoad={(map) => {
-                    mapRef.current = map; // Save the map instance
-                }}
-                onIdle={handleMapIdle}
-            >
-                {userLocation && (
-                    <Marker
-                        position={userLocation}
-                        label="You"
-                        title="Your Location"
-                    />
-                )}
-            </GoogleMap>
-        </LoadScript>
+            {/* Render marker at the current location */}
+            {markerLocation.lat !== null && markerLocation.lng !== null && (
+                <Marker
+                    position={{
+                        lat: markerLocation.lat,
+                        lng: markerLocation.lng,
+                    }}
+                />
+            )}
+        </GoogleMap>
     );
 };
 

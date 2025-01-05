@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import HobbiesTable from "../components/tables/HobbiesTable";
 import AddHobbyModal from "../molecules/modals/AddHobbyModal";
 import { auth } from "../config/firebaseConfig";
+import Spinner from "../atoms/spinners/Spinner.tsx";
 
 const HobbiesPage: React.FC = () => {
     const [hobbies, setHobbies] = useState<string[]>([]);
     const [isAdding, setIsAdding] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     // Fetch hobbies from the backend
     const fetchHobbies = async () => {
@@ -24,6 +26,7 @@ const HobbiesPage: React.FC = () => {
 
             const data = await response.json();
             setHobbies(data);
+            setIsLoading(false);
         } catch (error) {
             console.error("Error fetching hobbies:", error);
             alert("Failed to fetch hobbies. Please try again later.");
@@ -59,7 +62,11 @@ const HobbiesPage: React.FC = () => {
 
     useEffect(() => {
         fetchHobbies();
-    }, []); // Fetch hobbies when the component mounts
+    }, [hobbies.length]); // Fetch hobbies when the component mounts
+
+    if (isLoading) {
+        return (<Spinner />);
+    }
 
     return (
         <div className="container mt-4">
