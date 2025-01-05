@@ -1,6 +1,7 @@
 package com.hobi.backend.firebase.service;
 
 import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -12,6 +13,8 @@ import com.hobi.backend.user.model.UserPreference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -22,6 +25,8 @@ public class FirebaseService {
     private static final String USER_REGISTERED_ERROR_MSG = "Error registering user: ";
     private static final String INTERRUPTED_REQUEST_ERROR_MSG =
             "Error: The request was interrupted. Please try again.";
+    private static final String COMPUTATION_CANCELED_EXCEPTION =
+            "Error: The computation was canceled: ";
     private static final String DATABASE_INTERNAL_ERROR_MSG =
             "Error: Unable to save the user due to a database error. Details: ";
 
@@ -58,5 +63,26 @@ public class FirebaseService {
             log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
             return DATABASE_INTERNAL_ERROR_MSG + e.getMessage();
         }
+    }
+
+    public Optional<UserPreference> getUserPreferences(String userId) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
+            if (document.exists()) {
+                return Optional.ofNullable(document.toObject(UserPreference.class));
+            }
+        } catch (CancellationException e) {
+            log.error(COMPUTATION_CANCELED_EXCEPTION + e.getMessage());
+            return Optional.empty();
+        } catch (InterruptedException e) {
+            log.error(INTERRUPTED_REQUEST_ERROR_MSG);
+            Thread.currentThread().interrupt();
+            return Optional.empty();
+        } catch (ExecutionException e) {
+            log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
+            return Optional.empty();
+        }
+        return Optional.empty();
     }
 }
