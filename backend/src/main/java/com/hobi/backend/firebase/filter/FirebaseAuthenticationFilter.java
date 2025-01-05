@@ -19,8 +19,8 @@ import java.io.IOException;
 @Slf4j
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final String INVALID_TOKEN_ERROR_MSG = "Invalid Firebase ID-Token";
-    private static final String MISSING_TOKEN_ERROR_MSG = "Missing Firebase ID-Token";
+    private static final String INVALID_TOKEN_ERROR_MSG = "Invalid Firebase ID-Token: ";
+    private static final String MISSING_TOKEN_ERROR_MSG = "Missing Firebase ID-Token: ";
 
     @Override
     protected void doFilterInternal(
@@ -41,7 +41,7 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
         final String idToken = authorizationHeader.substring(BEARER_PREFIX.length());
 
         if (idToken.isEmpty()) {
-            log.error(MISSING_TOKEN_ERROR_MSG);
+            log.error(MISSING_TOKEN_ERROR_MSG + idToken);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, MISSING_TOKEN_ERROR_MSG);
             return;
         }
@@ -57,7 +57,7 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().getAuthentication().setAuthenticated(true);
 
         } catch (FirebaseAuthException e) {
-            log.error(INVALID_TOKEN_ERROR_MSG);
+            log.error(INVALID_TOKEN_ERROR_MSG + idToken);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, INVALID_TOKEN_ERROR_MSG);
             return;
         }
