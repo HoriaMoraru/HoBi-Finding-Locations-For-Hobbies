@@ -1,45 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import HobbiesTable from "../components/tables/HobbiesTable";
 import AddHobbyModal from "../molecules/modals/AddHobbyModal";
 import { auth } from "../config/firebaseConfig";
-
 
 const HobbiesPage: React.FC = () => {
     const [hobbies, setHobbies] = useState<string[]>([]);
     const [isAdding, setIsAdding] = useState<boolean>(false);
 
-    // Delete a hobby
-    const handleDelete = async (index: number) => {
+    // Fetch hobbies from the backend
+    const fetchHobbies = async () => {
         try {
-            // Make a POST request to the backend
             const authToken = await auth.currentUser?.getIdToken();
             const response = await fetch("http://localhost:8080/api/hobbies", {
-                method: "DELETE",
+                method: "GET",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${authToken}`,
                 },
-                body: JSON.stringify({
-                    hobby: hobbies[index],
-                }),
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to delete hobby. Please try again later.`);
+                throw new Error("Failed to fetch hobbies. Please try again later.");
             }
 
-            setHobbies(hobbies.filter((_, i) => i !== index));
-
+            const data = await response.json();
+            setHobbies(data);
         } catch (error) {
-            console.error("Error during hobby delete:", error);
-            alert("Failed to delete hobby. Please try again later.");
+            console.error("Error fetching hobbies:", error);
+            alert("Failed to fetch hobbies. Please try again later.");
         }
     };
 
     // Add a new hobby
     const handleAdd = async (newHobby: string) => {
         try {
-            // Make a POST request to the backend
             const authToken = await auth.currentUser?.getIdToken();
             const response = await fetch("http://localhost:8080/api/hobbies", {
                 method: "PUT",
@@ -53,16 +46,20 @@ const HobbiesPage: React.FC = () => {
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to add hobby. Please try again later.`);
+                throw new Error("Failed to add hobby. Please try again later.");
             }
-            setHobbies([...hobbies, newHobby]);
-            setIsAdding(false);
 
+            setIsAdding(false);
+            await fetchHobbies(); // Refresh hobbies after adding
         } catch (error) {
-            console.error("Error during hobby adding:", error);
+            console.error("Error during hobby addition:", error);
             alert("Failed to add hobby. Please try again later.");
         }
     };
+
+    useEffect(() => {
+        fetchHobbies();
+    }, []); // Fetch hobbies when the component mounts
 
     return (
         <div className="container mt-4">
@@ -73,7 +70,7 @@ const HobbiesPage: React.FC = () => {
             >
                 + Add Hobby
             </button>
-            <HobbiesTable hobbies={hobbies} onDelete={handleDelete} />
+            <HobbiesTable hobbies={hobbies} onDelete={() => fetchHobbies()} />
             {isAdding && (
                 <AddHobbyModal
                     onClose={() => setIsAdding(false)}
