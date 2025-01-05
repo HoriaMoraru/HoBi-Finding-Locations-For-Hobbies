@@ -1,16 +1,34 @@
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useDispatch } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { auth } from "../config/firebaseConfig.ts";
 import LoginComponent from "../components/forms/LoginComponent";
 import LoginImage from "../assets/images/login-page.jpg";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import {loginSuccess} from "../store/authSlice.ts";
+import {RootState} from "../store";
 
 function LoginPage() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (!loading && isAuthenticated) {
+            navigate("/explore");
+        }
+    }, [loading, isAuthenticated, navigate]);
+
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
+    }
 
     const handleFormSubmit = async (formData: { email: string; password: string }) => {
         try {
@@ -21,7 +39,7 @@ function LoginPage() {
             const user = userCredential.user;
             dispatch(loginSuccess({ email: user.email || "" }));
             setError("");
-            navigate("/");
+            navigate("/explore");
         } catch (err: unknown) {
             if (err instanceof Error && "code" in err) {
                 const errorCode = (err as { code: string }).code;
