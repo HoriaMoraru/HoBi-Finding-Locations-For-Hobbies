@@ -7,13 +7,17 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.cloud.FirestoreClient;
 import com.hobi.backend.request.CreateUserRequest;
+import com.hobi.backend.request.UpdateHobbyRequest;
+import com.hobi.backend.request.UpdateLocationRequest;
+import com.hobi.backend.user.model.Location;
 import com.hobi.backend.user.model.User;
 import com.hobi.backend.user.model.UserPreference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -24,10 +28,9 @@ public class FirebaseService {
     private static final String USER_REGISTERED_ERROR_MSG = "Error registering user: ";
     private static final String INTERRUPTED_REQUEST_ERROR_MSG =
             "Error: The request was interrupted. Please try again.";
-    private static final String COMPUTATION_CANCELED_EXCEPTION =
-            "Error: The computation was canceled: ";
     private static final String DATABASE_INTERNAL_ERROR_MSG =
             "Error: Unable to save the user due to a database error. Details: ";
+    private static final String USER_NOT_FOUND_ERROR_MSG = "User not found with ID: ";
 
     public String registerUser(CreateUserRequest createUserRequest) {
         try {
@@ -45,6 +48,7 @@ public class FirebaseService {
             user.setEmail(createUserRequest.getEmail());
             user.setPassword(createUserRequest.getPassword()); // You may want to hash this
             user.setUserPreference(new UserPreference()); // Placeholder for future preferences
+            user.setRealTimeLocation(new Location()); // This will get updated by front-end
 
             db.collection(COLLECTION_NAME).document(userRecord.getUid()).set(user).get();
 
@@ -64,16 +68,108 @@ public class FirebaseService {
         }
     }
 
-    public Optional<UserPreference> getUserPreferences(String userId) {
+    public boolean addHobby(String userId, UpdateHobbyRequest hobbyRequest) {
+        final String hobby = hobbyRequest.getHobby();
         try {
             Firestore db = FirestoreClient.getFirestore();
+
             DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
-            if (document.exists()) {
-                return Optional.ofNullable(document.toObject(UserPreference.class));
+            if (!document.exists()) {
+                log.error(USER_NOT_FOUND_ERROR_MSG + userId);
+                return false;
             }
-        } catch (CancellationException e) {
-            log.error(COMPUTATION_CANCELED_EXCEPTION + e.getMessage());
-            return Optional.empty();
+
+            User user = document.toObject(User.class);
+            if (user == null) {
+                log.error("Failed to map user document to User object for ID: " + userId);
+                return false;
+            }
+
+            UserPreference userPreference = user.getUserPreference();
+            if (userPreference == null) {
+                userPreference = new UserPreference();
+                user.setUserPreference(userPreference);
+            }
+
+            if (!userPreference.getHobbies().contains(hobby)) {
+                userPreference.getHobbies().add(hobby);
+            } else {
+                log.info("Hobby already exists for user: " + userId);
+            }
+
+            db.collection(COLLECTION_NAME).document(userId).set(user).get();
+            log.info("Hobby added successfully for user: " + userId);
+            return true;
+
+        } catch (InterruptedException e) {
+            log.error(INTERRUPTED_REQUEST_ERROR_MSG);
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (ExecutionException e) {
+            log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean removeHobby(String userId, UpdateHobbyRequest hobbyRequest) {
+        final String hobby = hobbyRequest.getHobby();
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
+            if (!document.exists()) {
+                log.error(USER_NOT_FOUND_ERROR_MSG + userId);
+                return false;
+            }
+
+            User user = document.toObject(User.class);
+            if (user == null) {
+                log.error("Failed to map user document to User object for ID: " + userId);
+                return false;
+            }
+
+            UserPreference userPreference = user.getUserPreference();
+            if (userPreference != null && userPreference.getHobbies().contains(hobby)) {
+                userPreference.getHobbies().remove(hobby);
+            } else {
+                log.info("Hobby not found for user: " + userId);
+            }
+
+            db.collection(COLLECTION_NAME).document(userId).set(user).get();
+            log.info("Hobby removed successfully for user: " + userId);
+            return true;
+
+        } catch (InterruptedException e) {
+            log.error(INTERRUPTED_REQUEST_ERROR_MSG);
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (ExecutionException e) {
+            log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
+            return false;
+        }
+    }
+
+    public Optional<List<String>> getHobbies(String userId) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+
+            // Fetch the user document
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
+            if (!document.exists()) {
+                log.error(USER_NOT_FOUND_ERROR_MSG + userId);
+                return Optional.empty();
+            }
+
+            // Map to User object
+            User user = document.toObject(User.class);
+            if (user == null || user.getUserPreference() == null) {
+                log.error("Failed to retrieve user preferences for ID: " + userId);
+                return Optional.empty();
+            }
+
+            // Return the hobbies list
+            return Optional.ofNullable(user.getUserPreference().getHobbies());
+
         } catch (InterruptedException e) {
             log.error(INTERRUPTED_REQUEST_ERROR_MSG);
             Thread.currentThread().interrupt();
@@ -82,6 +178,40 @@ public class FirebaseService {
             log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
             return Optional.empty();
         }
-        return Optional.empty();
+    }
+
+    public boolean updateUserLocation(String userId, UpdateLocationRequest locationRequest) {
+        final Location currentUserLocation = locationRequest.getLocation();
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+
+            // Fetch the user document
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
+            if (!document.exists()) {
+                log.error(USER_NOT_FOUND_ERROR_MSG + userId);
+                return false;
+            }
+
+            User user = document.toObject(User.class);
+            if (user == null) {
+                log.error("Failed to map user document for ID: " + userId);
+                return false;
+            }
+
+            // Update the user's location
+            user.setRealTimeLocation(currentUserLocation);
+            db.collection(COLLECTION_NAME).document(userId).set(user).get();
+
+            log.info("Location updated for user: " + userId);
+            return true;
+
+        } catch (InterruptedException e) {
+            log.error(INTERRUPTED_REQUEST_ERROR_MSG);
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (ExecutionException e) {
+            log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
+            return false;
+        }
     }
 }

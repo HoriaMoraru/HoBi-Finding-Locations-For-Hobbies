@@ -12,4 +12,5 @@ public class User {
     private String email;
     private String password;
     private UserPreference userPreference;
+    private Location realTimeLocation;
 }
