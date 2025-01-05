@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import LoginComponent from "../components/forms/LoginComponent";
+import LoginImage from "../assets/images/login-page.jpg";
 import { useState } from "react";
 
 function LoginPage() {
@@ -15,7 +16,7 @@ function LoginPage() {
             const idToken = await userCredential.user.getIdToken();
             localStorage.setItem("authToken", idToken);
 
-            setError(""); // Clear any previous errors
+            setError("");
             navigate("/");
         } catch (err: unknown) {
             if (err instanceof Error && "code" in err) {
@@ -46,19 +47,59 @@ function LoginPage() {
     };
 
     return (
-        <div className="container d-flex flex-column align-items-center mt-3">
-            <h1 className="mb-3">Log in</h1>
+        <div
+            className="d-flex vh-100"
+            style={{
+                color: "white",
+                overflow: "hidden",
+            }}
+        >
+            {/* Login Section */}
+            <div
+                className="login-section d-flex flex-column justify-content-center align-items-center"
+                style={{
+                    flex: "1 1 33%",
+                    backgroundColor: "rgba(0, 0, 0, 0.8)", // Semi-transparent dark background
+                    padding: "20px",
+                }}
+            >
+                <div className="container d-flex flex-column align-items-center">
+                    <h1 className="mb-3">Log in</h1>
 
-            {/* Bootstrap Banner for Errors */}
-            {error ? (
-                <div className="alert alert-danger w-100 text-center" role="alert">
-                    {error}
+                    {error ? (
+                        <div className="alert alert-danger w-100 text-center" role="alert">
+                            {error}
+                        </div>
+                    ) : null}
+
+                    <div className="w-100" style={{ maxWidth: "400px" }}>
+                        <LoginComponent onSubmit={handleFormSubmit} />
+                    </div>
+                    <div
+                        className="w-100 d-flex flex-column align-items-center mt-3"
+                        style={{ maxWidth: "400px" }}
+                    >
+                        <a
+                            href="/register"
+                            className="text-decoration-none fw-bold"
+                            style={{ color: "white", textDecoration: "underline" }}
+                        >
+                            Do you not have an account? Register now
+                        </a>
+                    </div>
                 </div>
-            ) : null}
-
-            <div className="w-100" style={{ maxWidth: "400px" }}>
-                <LoginComponent onSubmit={handleFormSubmit} />
             </div>
+
+            {/* Image Section */}
+            <div
+                className="image-section"
+                style={{
+                    flex: "2 1 67%",
+                    backgroundImage: `url(${LoginImage})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                }}
+            ></div>
         </div>
     );
 }
