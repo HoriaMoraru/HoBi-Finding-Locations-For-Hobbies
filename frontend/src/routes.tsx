@@ -1,11 +1,16 @@
 import { RouteObject } from "react-router-dom";
 import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
 
 
 const routes: RouteObject[] = [
     {
         path: "/register",
         element: <RegisterPage/>,
+    },
+    {
+        path:"/login",
+        element: <LoginPage/>
     },
     {
         path: "/",

@@ -4,7 +4,7 @@ import RegisterComponent from '../components/forms/RegisterComponent';
 function RegisterPage() {
     const navigate = useNavigate();
 
-    const handleFormSubmit = async (formData: { email: string; password: string; confirmPassword: string }) => {
+    const handleFormSubmit = async (formData: { email: string; password: string }) => {
         try {
             // Make a POST request to the backend
             const response = await fetch('http://localhost:8080/api/register', {
@@ -23,7 +23,7 @@ function RegisterPage() {
             }
 
             // Navigate to the home page after successful registration
-            navigate("/", { state: { formData, dataSubmitted: true } });
+            navigate("/login", { state: { formData, dataSubmitted: true } });
         } catch (error) {
             console.error('Error during registration:', error);
             alert('Registration failed. Please try again.');
