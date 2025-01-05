@@ -1,25 +1,35 @@
+// src/components/LeftPanel.tsx
+
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const LeftPanel: React.FC = () => {
-    const navigate = useNavigate();
-
-    const handleSavedLocationsClick = () => {
-        navigate("/saved-locations"); // Navigate to saved locations page
-    };
-
-    const handleHobbiesClick = () => {
-        navigate("/hobbies"); // Navigate to hobbies page
-    };
+    const location = useLocation();
 
     return (
         <div className="left-panel">
-            <button className="btn btn-primary w-100 mb-3" onClick={handleSavedLocationsClick}>
+            <Link
+                to="/explore/saved-locations"
+                className={`btn w-100 mb-3 ${
+                    location.pathname === "/explore/saved-locations"
+                        ? "btn-primary"
+                        : "btn-outline-primary"
+                }`}
+                aria-label="Navigate to Saved Locations"
+            >
                 Saved Locations
-            </button>
-            <button className="btn btn-secondary w-100" onClick={handleHobbiesClick}>
+            </Link>
+            <Link
+                to="/explore/hobbies"
+                className={`btn w-100 ${
+                    location.pathname === "/explore/hobbies"
+                        ? "btn-secondary"
+                        : "btn-outline-secondary"
+                }`}
+                aria-label="Navigate to Hobbies"
+            >
                 Hobbies
-            </button>
+            </Link>
         </div>
     );
 };

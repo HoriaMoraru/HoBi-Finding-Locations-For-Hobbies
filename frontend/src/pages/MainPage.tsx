@@ -1,11 +1,9 @@
 import React from "react";
-import Header from "../organisms/header/Header";
 import StartExploringButton from "../atoms/buttons/StartExploringButton.tsx";
 
 const MainPage: React.FC = () => {
     return (
         <div>
-            <Header />
             <main className="container mt-4">
                 {/* Hero Section */}
                 <section className="text-center py-5 bg-light">

@@ -1,0 +1,58 @@
+/* HobbiesTable.css */
+
+/* Table container styling */
+.table-container {
+    margin-top: 20px;
+    overflow-x: auto; /* Makes the table responsive */
+    border: 1px solid #ddd; /* Add a border around the table */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Custom table styling */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "Arial", sans-serif;
+}
+
+/* Table header */
+.custom-table thead th {
+    background-color: #4caf50; /* Green header background */
+    color: white;
+    font-weight: bold;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+}
+
+/* Table rows */
+.custom-table tbody tr {
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+.custom-table tbody tr:hover {
+    background-color: #f1f1f1; /* Light gray on hover */
+}
+
+/* Table cells */
+.custom-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Delete button styling */
+.delete-button {
+    background-color: #ff4d4d; /* Red background */
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #ff1a1a; /* Darker red on hover */
+}

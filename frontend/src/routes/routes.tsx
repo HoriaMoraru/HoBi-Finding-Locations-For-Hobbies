@@ -1,32 +1,58 @@
-import { RouteObject } from "react-router-dom";
-import RegisterPage from "../pages/RegisterPage";
-import LoginPage from "../pages/LoginPage";
+
+import { RouteObject, Navigate } from "react-router-dom";
+import Layout from "../organisms/layouts/Layout";
+import PrivateRoute from "./PrivateRoute";
+
 import MainPage from "../pages/MainPage";
-import PrivateRoute from "./PrivateRoute.tsx";
+import LoginPage from "../pages/LoginPage";
+import RegisterPage from "../pages/RegisterPage";
 import ExplorePage from "../pages/ExplorePage";
+import AuthLayout from "../organisms/layouts/AuthLayout.tsx";
+import HobbiesPage from "../pages/HobbiesPage.tsx";
 
 const routes: RouteObject[] = [
     {
-        path: "/register",
-        element: <RegisterPage/>,
-    },
-    {
-        path:"/login",
-        element: <LoginPage/>
-    },
-    {
+
         path: "/",
-        element: <MainPage/>,
-    },
-    {
-        path: "/explore",
-        element: <PrivateRoute/>,
+        element: <Layout />, // Layout includes Navbar
         children: [
             {
-                path: "", element: <ExplorePage/>
-            }
-        ]
-    }
+                path: "", // Main Page (Public)
+                element: <MainPage />,
+            },
+            {
+                element: <PrivateRoute />, // Wrap with PrivateRoute
+                children: [
+                    {
+                        element: <AuthLayout />,
+                        children: [
+                            {
+                                path: "explore",
+                                element: <ExplorePage/>
+                            },
+                            {
+                                path: "explore/hobbies",
+                                element: <HobbiesPage/>
+                            }
+                        ]
+                    },
+                ],
+            },
+            // Add more routes here as needed
+        ],
+    },
+    {
+        path: "*", // Fallback for undefined routes
+        element: <Navigate to="/" replace />,
+    },
+    {
+        path: "login", // Login Page (Public)
+        element: <LoginPage />,
+    },
+    {
+        path: "register", // Register Page (Public)
+        element: <RegisterPage />,
+    },
 ];
 
 export default routes;

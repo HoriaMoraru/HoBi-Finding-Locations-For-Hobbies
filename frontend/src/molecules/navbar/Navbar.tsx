@@ -4,7 +4,7 @@ import { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
 import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebaseConfig";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import HobiLogo from "../../assets/images/hobi-logo.png";
 
 const Navbar: React.FC = () => {
@@ -23,18 +23,24 @@ const Navbar: React.FC = () => {
     };
 
     if (loading) {
-        return <nav className="navbar bg-light"><div className="container">Loading...</div></nav>;
+        return (
+            <nav className="navbar bg-light">
+                <div className="container">
+                    <span>Loading...</span>
+                </div>
+            </nav>
+        );
     }
 
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <div className="container-fluid">
-                <a className="navbar-brand" href="/">
+                <picture className="navbar-brand">
                     <div
                         style={{
                             height: "60px",
                             width: "60px",
-                            overflow: "hidden"
+                            overflow: "hidden",
                         }}
                     >
                         <img
@@ -48,20 +54,39 @@ const Navbar: React.FC = () => {
                             }}
                         />
                     </div>
-                </a>
-                <div className="d-flex align-items-center">
-                    {user?.email ? (
-                        <>
-                            <span className="me-3">{user.email}</span>
-                            <button className="btn btn-outline-danger" onClick={handleLogout}>
-                                Log out
-                            </button>
-                        </>
-                    ) : (
-                        <a className="btn btn-primary" href="/login">
-                            Log in
-                        </a>
-                    )}
+                </picture>
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
+                    <span className="navbar-toggler-icon"></span>
+                </button>
+                <div
+                    className="collapse navbar-collapse justify-content-end"
+                    id="navbarSupportedContent"
+                >
+                    <div className="d-flex align-items-center">
+                        {user?.email ? (
+                            <>
+                                <span className="me-3">{user.email}</span>
+                                <button
+                                    className="btn btn-outline-danger"
+                                    onClick={handleLogout}
+                                >
+                                    Log out
+                                </button>
+                            </>
+                        ) : (
+                            <Link className="btn btn-primary" to="/login">
+                                Log in
+                            </Link>
+                        )}
+                    </div>
                 </div>
             </div>
         </nav>
