@@ -19,8 +19,8 @@ public class UserController {
     private final FirebaseService firebaseService;
 
     @PostMapping("/register")
-    public String createUser(@RequestBody CreateUserRequest createUserRequest) {
-        return firebaseService.registerUser(createUserRequest);
+    public ResponseEntity<String> createUser(@RequestBody CreateUserRequest createUserRequest) {
+        return ResponseEntity.ok(firebaseService.registerUser(createUserRequest));
     }
 
     @PostMapping("/displayUserPage")
