@@ -5,9 +5,10 @@ import { logout } from "../../store/authSlice";
 import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebaseConfig";
 import { useNavigate } from "react-router-dom";
+import HobiLogo from "../../assets/images/hobi-logo.png";
 
 const Navbar: React.FC = () => {
-    const { user } = useSelector((state: RootState) => state.auth); // Get user from Redux state
+    const { user, loading } = useSelector((state: RootState) => state.auth); // Get user from Redux state
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -21,16 +22,37 @@ const Navbar: React.FC = () => {
         }
     };
 
+    if (loading) {
+        return <nav className="navbar bg-light"><div className="container">Loading...</div></nav>;
+    }
+
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <div className="container-fluid">
                 <a className="navbar-brand" href="/">
-                    HoBi
+                    <div
+                        style={{
+                            height: "60px",
+                            width: "60px",
+                            overflow: "hidden"
+                        }}
+                    >
+                        <img
+                            src={HobiLogo}
+                            alt="Logo"
+                            style={{
+                                height: "100%",
+                                width: "100%",
+                                objectFit: "cover", // Ensures the image fills the container
+                                objectPosition: "center", // Centers the image
+                            }}
+                        />
+                    </div>
                 </a>
                 <div className="d-flex align-items-center">
                     {user?.email ? (
                         <>
-                            <span className="me-3">{user.email}</span> {/* Display user email */}
+                            <span className="me-3">{user.email}</span>
                             <button className="btn btn-outline-danger" onClick={handleLogout}>
                                 Log out
                             </button>
