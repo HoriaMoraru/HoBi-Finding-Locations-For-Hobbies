@@ -18,25 +18,24 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class SecurityConfig {
 
     private static final String BASE_API_PATH = "/api/**";
-    private static final String[] AUTHENTICATED_ENDPOINTS = {
-        "/api/da"
-    };
-    private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/register"
-    };
+    private static final String REGISTER_ENDPOINT = "/api/register";
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.securityMatcher(BASE_API_PATH)
+        http
+                // Apply security to all endpoints matching BASE_API_PATH
+                .securityMatcher(BASE_API_PATH)
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(new FirebaseAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll() // Allow public access to /login and /register
-                        .requestMatchers(AUTHENTICATED_ENDPOINTS).authenticated() // Require authentication for other /api/** endpoints
+                        // Permit access to /api/register without authentication
+                        .requestMatchers(REGISTER_ENDPOINT).permitAll()
+                        // Require authentication for all other endpoints under BASE_API_PATH
+                        .anyRequest().authenticated()
                 );
 
         return http.build();
     }
-
 }

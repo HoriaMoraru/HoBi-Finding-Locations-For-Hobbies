@@ -30,7 +30,7 @@ public class FirebaseService {
     private static final String DATABASE_INTERNAL_ERROR_MSG =
             "Error: Unable to save the user due to a database error. Details: ";
     private static final String USER_NOT_FOUND_ERROR_MSG = "User not found with ID: ";
-
+    // USERS
     public String registerUser(CreateUserRequest createUserRequest) {
         try {
             // Create user in Firebase Authentication
@@ -66,7 +66,8 @@ public class FirebaseService {
             return DATABASE_INTERNAL_ERROR_MSG + e.getMessage();
         }
     }
-
+    // END OF USERS
+    // HOBBIES
     public boolean addHobby(String userId, UpdateHobbyRequest hobbyRequest) {
         final String hobby = hobbyRequest.getHobby();
         try {
@@ -178,7 +179,8 @@ public class FirebaseService {
             return Optional.empty();
         }
     }
-
+    // END OF HOBBIES
+    // LOCATION
     public boolean updateUserLocation(String userId, UpdateLocationRequest locationRequest) {
         final Location currentUserLocation = locationRequest.getLocation();
         try {
@@ -213,4 +215,36 @@ public class FirebaseService {
             return false;
         }
     }
+
+    public Optional<Location> getUserRealTimeLocation(String userId) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+
+            // Fetch the user document
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
+            if (!document.exists()) {
+                log.error(USER_NOT_FOUND_ERROR_MSG + userId);
+                return Optional.empty();
+            }
+
+            // Map to User object
+            User user = document.toObject(User.class);
+            if (user == null || user.getRealTimeLocation() == null) {
+                log.error("Failed to retrieve location for user ID: " + userId);
+                return Optional.empty();
+            }
+
+            // Return the user's location
+            return Optional.of(user.getRealTimeLocation());
+
+        } catch (InterruptedException e) {
+            log.error(INTERRUPTED_REQUEST_ERROR_MSG);
+            Thread.currentThread().interrupt();
+            return Optional.empty();
+        } catch (ExecutionException e) {
+            log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
+            return Optional.empty();
+        }
+    }
+    // END OF LOCATION
 }
