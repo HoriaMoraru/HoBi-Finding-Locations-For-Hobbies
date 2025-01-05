@@ -1,7 +1,7 @@
 package com.hobi.backend.controller;
 
 import com.hobi.backend.firebase.service.FirebaseService;
-import com.hobi.backend.model.User;
+import com.hobi.backend.request.CreateUserRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +15,7 @@ public class UserController {
     private final FirebaseService firebaseService;
 
     @PostMapping
-    public String createUser(@RequestBody User user) {
-        return firebaseService.saveUser(user);
+    public String createUser(@RequestBody CreateUserRequest createUserRequest) {
+        return firebaseService.registerUser(createUserRequest);
     }
 }

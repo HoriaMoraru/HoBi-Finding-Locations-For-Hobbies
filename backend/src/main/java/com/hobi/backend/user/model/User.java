@@ -1,4 +1,4 @@
-package com.hobi.backend.model;
+package com.hobi.backend.user.model;
 
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.Data;
@@ -10,5 +10,6 @@ public class User {
     @DocumentId
     private String userId;
     private String email;
+    private String password;
     private UserPreference userPreference;
 }
