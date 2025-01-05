@@ -6,6 +6,6 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UpdateLocationRequest {
+public class LocationRequest {
     private Location location;
 }

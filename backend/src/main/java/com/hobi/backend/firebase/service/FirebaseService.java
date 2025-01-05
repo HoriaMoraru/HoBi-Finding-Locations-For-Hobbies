@@ -6,10 +6,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.cloud.FirestoreClient;
+import com.hobi.backend.maps.model.NamedLocation;
 import com.hobi.backend.request.CreateUserRequest;
 import com.hobi.backend.request.UpdateHobbyRequest;
-import com.hobi.backend.request.UpdateLocationRequest;
+import com.hobi.backend.request.LocationRequest;
 import com.hobi.backend.maps.model.Location;
+import com.hobi.backend.request.UpdateUserLocationRequest;
 import com.hobi.backend.user.model.User;
 import com.hobi.backend.user.model.UserPreference;
 import lombok.extern.slf4j.Slf4j;
@@ -181,7 +183,7 @@ public class FirebaseService {
     }
     // END OF HOBBIES
     // LOCATION
-    public boolean updateUserLocation(String userId, UpdateLocationRequest locationRequest) {
+    public boolean updateUserLocation(String userId, LocationRequest locationRequest) {
         final Location currentUserLocation = locationRequest.getLocation();
         try {
             Firestore db = FirestoreClient.getFirestore();
@@ -244,6 +246,95 @@ public class FirebaseService {
         } catch (ExecutionException e) {
             log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
             return Optional.empty();
+        }
+    }
+
+    public boolean saveUserLocation(String userId, UpdateUserLocationRequest locationRequest) {
+        final NamedLocation location = locationRequest.getLocation();
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+
+            // Fetch user document
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
+            if (!document.exists()) {
+                log.error("User not found with ID: {}", userId);
+                return false;
+            }
+
+            // Map to User object
+            User user = document.toObject(User.class);
+            if (user == null) {
+                log.error("Failed to map user document for ID: {}", userId);
+                return false;
+            }
+
+            // Add location to savedLocations
+            UserPreference userPreference = user.getUserPreference();
+            if (userPreference == null) {
+                userPreference = new UserPreference();
+                user.setUserPreference(userPreference);
+            }
+
+            userPreference.getSavedLocations().add(new NamedLocation(
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    location.getName()
+            ));
+
+            // Save updated user back to Firestore
+            db.collection(COLLECTION_NAME).document(userId).set(user).get();
+            log.info("Location saved successfully for user: {}", userId);
+            return true;
+
+        } catch (InterruptedException e) {
+            log.error(INTERRUPTED_REQUEST_ERROR_MSG);
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (ExecutionException e) {
+            log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean removeUserLocation(String userId, UpdateUserLocationRequest locationRequest) {
+        final NamedLocation location = locationRequest.getLocation();
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+
+            // Fetch user document
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
+            if (!document.exists()) {
+                log.error("User not found with ID: {}", userId);
+                return false;
+            }
+
+            // Map to User object
+            User user = document.toObject(User.class);
+            if (user == null) {
+                log.error("Failed to map user document for ID: {}", userId);
+                return false;
+            }
+
+            // Remove location from savedLocations
+            UserPreference userPreference = user.getUserPreference();
+            if (userPreference != null) {
+                userPreference.getSavedLocations().removeIf(
+                        savedLocation -> savedLocation.equals(location)
+                );
+            }
+
+            // Save updated user back to Firestore
+            db.collection(COLLECTION_NAME).document(userId).set(user).get();
+            log.info("Location removed successfully for user: {}", userId);
+            return true;
+
+        } catch (InterruptedException e) {
+            log.error(INTERRUPTED_REQUEST_ERROR_MSG);
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (ExecutionException e) {
+            log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
+            return false;
         }
     }
     // END OF LOCATION

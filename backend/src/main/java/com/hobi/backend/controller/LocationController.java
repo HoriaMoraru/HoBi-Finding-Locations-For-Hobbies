@@ -1,10 +1,11 @@
 package com.hobi.backend.controller;
 
+import com.google.maps.model.DirectionsRoute;
 import com.hobi.backend.firebase.service.FirebaseService;
 import com.hobi.backend.maps.model.Location;
 import com.hobi.backend.maps.service.MapsService;
-import com.hobi.backend.request.UpdateHobbyRequest;
-import com.hobi.backend.request.UpdateLocationRequest;
+import com.hobi.backend.request.LocationRequest;
+import com.hobi.backend.request.UpdateUserLocationRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class LocationController {
     @PostMapping("/update")
     public ResponseEntity<String> updateUserLocation(
             Authentication authentication,
-            @RequestBody UpdateLocationRequest locationRequest) {
+            @RequestBody LocationRequest locationRequest) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
@@ -43,7 +44,7 @@ public class LocationController {
         }
     }
 
-    @GetMapping("/fetchLocatinos/{hobby}")
+    @GetMapping("/fetchLocations/{hobby}")
     public ResponseEntity<List<Location>> fetchLocationsByHobby(
             Authentication authentication,
             @PathVariable("hobby") String hobby) {
@@ -62,5 +63,68 @@ public class LocationController {
         final Location userLocation = locationOpt.get();
 
         return ResponseEntity.ok(mapsService.fetchLocationsForHobby(userLocation, hobby));
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<String> saveUserLocation(
+            Authentication authentication,
+            @RequestBody UpdateUserLocationRequest locationRequest) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        final String userId = authentication.getName();
+        boolean isSaved = firebaseService.saveUserLocation(userId, locationRequest);
+
+        if (isSaved) {
+            return ResponseEntity.ok("Location saved successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to save location.");
+        }
+    }
+
+    @DeleteMapping("/remove")
+    public ResponseEntity<String> removeUserLocation(
+            Authentication authentication,
+            @RequestBody UpdateUserLocationRequest locationRequest) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        final String userId = authentication.getName();
+        boolean isRemoved = firebaseService.removeUserLocation(userId, locationRequest);
+
+        if (isRemoved) {
+            return ResponseEntity.ok("Location removed successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to remove location.");
+        }
+    }
+
+    @GetMapping("/route")
+    public ResponseEntity<DirectionsRoute> getRoute(
+            Authentication authentication,
+            @RequestBody LocationRequest locationRequest) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        final String userId = authentication.getName();
+
+        Optional<Location> userLocationOpt = firebaseService.getUserRealTimeLocation(userId);
+        if (userLocationOpt.isEmpty()) {
+            log.error("User with ID: {} does not have an updated location.", userId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Location userLocation = userLocationOpt.get();
+        Location destination = locationRequest.getLocation();
+
+        return mapsService.getRoute(userLocation, destination)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }
