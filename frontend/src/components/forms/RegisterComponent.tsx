@@ -19,7 +19,7 @@ function RegisterComponent({
             .matches(/@/, "Email doesn't match the right format.")
             .required("Email is required."),
         password: Yup.string()
-            .length(6, "Password must be at least 6 characters long.")
+            .min(6, "Password must be at least 6 characters long.")
             .required("Password is required."),
         confirmPassword: Yup.string()
             .oneOf([Yup.ref("password")], "Passwords must match.")
