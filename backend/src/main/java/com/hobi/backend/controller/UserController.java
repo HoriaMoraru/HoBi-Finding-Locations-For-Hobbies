@@ -18,4 +18,9 @@ public class UserController {
     public String createUser(@RequestBody CreateUserRequest createUserRequest) {
         return firebaseService.registerUser(createUserRequest);
     }
+
+    @PostMapping("/preferences")
+    public String da() {
+        return "Da!";
+    }
 }

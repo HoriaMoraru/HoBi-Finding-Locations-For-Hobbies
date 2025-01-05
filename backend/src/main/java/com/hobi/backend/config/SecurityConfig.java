@@ -19,10 +19,9 @@ public class SecurityConfig {
 
     private static final String BASE_API_PATH = "/api/**";
     private static final String[] AUTHENTICATED_ENDPOINTS = {
-
+        "/api/da"
     };
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/login",
             "/api/register"
     };
     @Bean
@@ -34,7 +33,7 @@ public class SecurityConfig {
                 .addFilterAfter(new FirebaseAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll() // Allow public access to /login and /register
-//                        .requestMatchers(AUTHENTICATED_ENDPOINTS).authenticated() // Require authentication for other /api/** endpoints
+                        .requestMatchers(AUTHENTICATED_ENDPOINTS).authenticated() // Require authentication for other /api/** endpoints
                 );
 
         return http.build();
