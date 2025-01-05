@@ -35,6 +35,4 @@ public class LocationController {
                     .body("Failed to update location.");
         }
     }
-
-    @GetMapping("/fetch/{")
 }
