@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+import { useDispatch } from "react-redux";
+import { auth } from "../config/firebaseConfig.ts";
 import LoginComponent from "../components/forms/LoginComponent";
 import LoginImage from "../assets/images/login-page.jpg";
 import { useState } from "react";
+import {loginSuccess} from "../store/authSlice.ts";
 
 function LoginPage() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [error, setError] = useState("");
 
     const handleFormSubmit = async (formData: { email: string; password: string }) => {
@@ -15,7 +18,8 @@ function LoginPage() {
             console.log("User signed in:", userCredential.user);
             const idToken = await userCredential.user.getIdToken();
             localStorage.setItem("authToken", idToken);
-
+            const user = userCredential.user;
+            dispatch(loginSuccess({ email: user.email || "" }));
             setError("");
             navigate("/");
         } catch (err: unknown) {
