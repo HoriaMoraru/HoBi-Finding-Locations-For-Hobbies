@@ -12,8 +12,9 @@ import java.io.IOException;
 
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 
-    @Value("${app.authorization.header}")
-    private String authorizationHeader;
+//    @Value("${app.authorization.header}")
+//    private String authorizationHeader;
+    private static final String BEARER_PREFIX = "Bearer ";
 
     @Override
     protected void doFilterInternal(
@@ -22,7 +23,15 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String idToken = request.getHeader(authorizationHeader);
+        final String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
+            // Skip authentication for requests without the Authorization header
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final String idToken = request.getHeader(authorizationHeader);
 
         if (idToken == null || idToken.isEmpty()) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing Firebase ID-Token");

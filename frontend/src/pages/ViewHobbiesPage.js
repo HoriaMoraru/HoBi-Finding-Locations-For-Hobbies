@@ -7,7 +7,7 @@ const ViewHobbiesPage = () => {
     try {
       const userId = "USER_ID"; // Replace this with a dynamic value from the login token
       const response = await fetch(
-        `http://localhost:8080/api/users/hobbies?userId=${userId}`
+        `http://localhost:8080/api/hobbies?userId=${userId}`
       );
 
       if (response.ok) {

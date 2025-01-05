@@ -17,18 +17,24 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @Slf4j
 public class SecurityConfig {
 
-    private static final String PUBLIC_MATCHERS = "/api/**";
+    private static final String BASE_API_PATH = "/api/**";
+    private static final String[] AUTHENTICATED_ENDPOINTS = {
+
+    };
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/api/login",
+            "/api/register"
+    };
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.securityMatcher(PUBLIC_MATCHERS)
+        http.securityMatcher(BASE_API_PATH)
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(new FirebaseAuthenticationFilter(), BasicAuthenticationFilter.class)
-                .authorizeHttpRequests(
-                        authorizeRequests -> authorizeRequests
-                                .requestMatchers(
-                                        PUBLIC_MATCHERS).authenticated()
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll() // Allow public access to /login and /register
+//                        .requestMatchers(AUTHENTICATED_ENDPOINTS).authenticated() // Require authentication for other /api/** endpoints
                 );
 
         return http.build();
