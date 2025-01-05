@@ -7,6 +7,7 @@ import LoginImage from "../assets/images/login-page.jpg";
 import {useEffect, useState} from "react";
 import {loginSuccess} from "../store/authSlice.ts";
 import {RootState} from "../store";
+import Spinner from "../atoms/spinners/Spinner.tsx";
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -21,13 +22,7 @@ function LoginPage() {
     }, [loading, isAuthenticated, navigate]);
 
     if (loading) {
-        return (
-            <div className="d-flex justify-content-center align-items-center vh-100">
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        );
+        return <Spinner/>;
     }
 
     const handleFormSubmit = async (formData: { email: string; password: string }) => {
