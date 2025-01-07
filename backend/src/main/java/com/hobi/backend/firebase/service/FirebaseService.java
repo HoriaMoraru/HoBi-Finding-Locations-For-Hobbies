@@ -17,8 +17,7 @@ import com.hobi.backend.user.model.UserPreference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -133,6 +132,12 @@ public class FirebaseService {
             UserPreference userPreference = user.getUserPreference();
             if (userPreference != null && userPreference.getHobbies().contains(hobby)) {
                 userPreference.getHobbies().remove(hobby);
+                if (userPreference.getHobbyLocations() != null) {
+                    userPreference.getHobbyLocations().entrySet().stream()
+                            .filter(entry -> entry.getKey().trim().toLowerCase().equals(hobby))
+                            .findFirst()
+                            .ifPresent(entry -> userPreference.getHobbyLocations().remove(entry.getKey()));
+                }
             } else {
                 log.info("Hobby not found for user: " + userId);
             }
@@ -249,7 +254,7 @@ public class FirebaseService {
         }
     }
 
-    public boolean saveUserLocation(String userId, UpdateUserLocationRequest locationRequest) {
+    public boolean addLocationToSaved(String userId, String hobby, UpdateUserLocationRequest locationRequest) {
         final NamedLocation location = locationRequest.getLocation();
         try {
             Firestore db = FirestoreClient.getFirestore();
@@ -275,15 +280,29 @@ public class FirebaseService {
                 user.setUserPreference(userPreference);
             }
 
-            userPreference.getSavedLocations().add(new NamedLocation(
-                    location.getLatitude(),
-                    location.getLongitude(),
-                    location.getName()
-            ));
+            Map<String, List<NamedLocation>> savedLocations = userPreference.getHobbyLocations();
+            if (savedLocations == null) {
+                savedLocations = new HashMap<>();
+                userPreference.setHobbyLocations(savedLocations);
+            }
+
+            List<NamedLocation> savedLocationsForHobby = savedLocations.computeIfAbsent(hobby, k -> new ArrayList<>());
+
+            final NamedLocation newLocation = new NamedLocation(
+                    location.getLat(),
+                    location.getLng(),
+                    location.getName());
+
+            if (savedLocationsForHobby.contains(newLocation)) {
+                log.info("Location {} is already saved for user: {}", newLocation, userId);
+                return false;
+            }
+
+            savedLocationsForHobby.add(newLocation);
 
             // Save updated user back to Firestore
             db.collection(COLLECTION_NAME).document(userId).set(user).get();
-            log.info("Location saved successfully for user: {}", userId);
+            log.info("Location {} saved successfully for user: {}", location, userId);
             return true;
 
         } catch (InterruptedException e) {
@@ -296,7 +315,7 @@ public class FirebaseService {
         }
     }
 
-    public boolean removeUserLocation(String userId, UpdateUserLocationRequest locationRequest) {
+    public boolean removeLocationFromSaved(String userId, String hobby, UpdateUserLocationRequest locationRequest) {
         final NamedLocation location = locationRequest.getLocation();
         try {
             Firestore db = FirestoreClient.getFirestore();
@@ -315,17 +334,24 @@ public class FirebaseService {
                 return false;
             }
 
-            // Remove location from savedLocations
+            // Remove location from hobby's saved locations
             UserPreference userPreference = user.getUserPreference();
             if (userPreference != null) {
-                userPreference.getSavedLocations().removeIf(
-                        savedLocation -> savedLocation.equals(location)
-                );
+                Map<String, List<NamedLocation>> hobbyLocations = userPreference.getHobbyLocations();
+                List<NamedLocation> locations = hobbyLocations.entrySet().stream()
+                        .filter(entry -> entry.getKey().trim().toLowerCase().equals(hobby))
+                        .map(Map.Entry::getValue)
+                        .findFirst()
+                        .orElse(new ArrayList<>());
+                boolean removed = locations.removeIf(savedLocation -> savedLocation.equals(location));
+                if (!removed) {
+                    log.warn("Location not found in hobby '{}' for user '{}'", hobby, userId);
+                }
             }
 
             // Save updated user back to Firestore
             db.collection(COLLECTION_NAME).document(userId).set(user).get();
-            log.info("Location removed successfully for user: {}", userId);
+            log.info("Location removed successfully for hobby '{}' and user '{}'", hobby, userId);
             return true;
 
         } catch (InterruptedException e) {
@@ -335,6 +361,44 @@ public class FirebaseService {
         } catch (ExecutionException e) {
             log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
             return false;
+        }
+    }
+
+    public Optional<List<NamedLocation>> getSavedLocations(String userId, String hobby) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+
+            // Fetch the user document
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(userId).get().get();
+            if (!document.exists()) {
+                log.error(USER_NOT_FOUND_ERROR_MSG + userId);
+                return Optional.empty();
+            }
+
+            // Map to User object
+            User user = document.toObject(User.class);
+            if (user == null || user.getUserPreference() == null) {
+                log.error("Failed to retrieve user preferences or user document is null for ID: {}", userId);
+                return Optional.empty();
+            }
+
+            // Return the saved locations list
+            Map<String, List<NamedLocation>> hobbyLocations = user.getUserPreference().getHobbyLocations();
+            List<NamedLocation> locations = hobbyLocations.entrySet().stream()
+                    .filter(entry -> entry.getKey().trim().toLowerCase().equals(hobby))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .orElse(new ArrayList<>());
+
+            return Optional.of(locations);
+
+        } catch (InterruptedException e) {
+            log.error(INTERRUPTED_REQUEST_ERROR_MSG);
+            Thread.currentThread().interrupt();
+            return Optional.empty();
+        } catch (ExecutionException e) {
+            log.error(DATABASE_INTERNAL_ERROR_MSG + e.getMessage());
+            return Optional.empty();
         }
     }
     // END OF LOCATION

@@ -37,7 +37,7 @@ public class MapsService {
         log.info(FETCH_START_LOG, hobby, userLocation);
 
         try {
-            LatLng latlng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+            LatLng latlng = new LatLng(userLocation.getLat(), userLocation.getLng());
 
             PlacesSearchResponse response = PlacesApi.nearbySearchQuery(geoApiContext, latlng)
                     .radius(SEARCH_RADIUS)
@@ -74,8 +74,8 @@ public class MapsService {
         try {
             // Fetch the route using Google Maps Directions API
             DirectionsResult result = DirectionsApi.newRequest(geoApiContext)
-                    .origin(new LatLng(origin.getLatitude(), origin.getLongitude()))
-                    .destination(new LatLng(destination.getLatitude(), destination.getLongitude()))
+                    .origin(new LatLng(origin.getLat(), origin.getLng()))
+                    .destination(new LatLng(destination.getLat(), destination.getLng()))
                     .await();
 
             // Return the first route if available

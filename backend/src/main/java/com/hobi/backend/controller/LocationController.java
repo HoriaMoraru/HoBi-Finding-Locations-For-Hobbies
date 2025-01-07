@@ -3,6 +3,7 @@ package com.hobi.backend.controller;
 import com.google.maps.model.DirectionsRoute;
 import com.hobi.backend.firebase.service.FirebaseService;
 import com.hobi.backend.maps.model.Location;
+import com.hobi.backend.maps.model.NamedLocation;
 import com.hobi.backend.maps.service.MapsService;
 import com.hobi.backend.request.LocationRequest;
 import com.hobi.backend.request.UpdateUserLocationRequest;
@@ -32,6 +33,8 @@ public class LocationController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
+
+        log.info("Updating real time location!");
 
         final String userId = authentication.getName();
         final boolean updatedUserLocation = firebaseService.updateUserLocation(userId, locationRequest);
@@ -65,16 +68,33 @@ public class LocationController {
         return ResponseEntity.ok(mapsService.fetchLocationsForHobby(userLocation, hobby));
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<String> saveUserLocation(
+    @GetMapping("/viewSaved/{hobby}")
+    public ResponseEntity<List<NamedLocation>> viewSavedLocations(
             Authentication authentication,
-            @RequestBody UpdateUserLocationRequest locationRequest) {
+            @PathVariable("hobby") String hobby) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        final String userId = authentication.getName();
+        return firebaseService.getSavedLocations(userId, hobby)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @PostMapping("/save/{hobby}")
+    public ResponseEntity<String> addLocationToSaved(
+            Authentication authentication,
+            @RequestBody UpdateUserLocationRequest locationRequest,
+            @PathVariable("hobby") String hobby) {
+
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
         final String userId = authentication.getName();
-        boolean isSaved = firebaseService.saveUserLocation(userId, locationRequest);
+        boolean isSaved = firebaseService.addLocationToSaved(userId, hobby, locationRequest);
 
         if (isSaved) {
             return ResponseEntity.ok("Location saved successfully.");
@@ -84,16 +104,18 @@ public class LocationController {
         }
     }
 
-    @DeleteMapping("/remove")
-    public ResponseEntity<String> removeUserLocation(
+    @DeleteMapping("/remove/{hobby}")
+    public ResponseEntity<String> removeLocationFromSaved(
             Authentication authentication,
-            @RequestBody UpdateUserLocationRequest locationRequest) {
+            @RequestBody UpdateUserLocationRequest locationRequest,
+            @PathVariable("hobby") String hobby) {
+
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
         final String userId = authentication.getName();
-        boolean isRemoved = firebaseService.removeUserLocation(userId, locationRequest);
+        boolean isRemoved = firebaseService.removeLocationFromSaved(userId, hobby, locationRequest);
 
         if (isRemoved) {
             return ResponseEntity.ok("Location removed successfully.");

@@ -9,6 +9,7 @@ import RegisterPage from "../pages/RegisterPage";
 import ExplorePage from "../pages/ExplorePage";
 import AuthLayout from "../organisms/layouts/AuthLayout.tsx";
 import HobbiesPage from "../pages/HobbiesPage.tsx";
+import SavedLocationsPage from "../pages/SavedLocationsPage.tsx";
 
 const routes: RouteObject[] = [
     {
@@ -33,6 +34,10 @@ const routes: RouteObject[] = [
                             {
                                 path: "explore/hobbies",
                                 element: <HobbiesPage/>
+                            },
+                            {
+                                path: "explore/saved-locations",
+                                element: <SavedLocationsPage/>
                             }
                         ]
                     },

@@ -1,5 +1,5 @@
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
-import {googleMapsConfig} from "../../config/googleMapsConfig.ts";
+import { googleMapsConfig } from "../../config/googleMapsConfig.ts";
 
 const mapContainerStyle = {
     width: "100%",
@@ -14,27 +14,27 @@ interface LatLng {
 interface GoogleMapsComponentProps {
     center: LatLng;
     markerLocation: LatLng;
-    setMarkerLocation: React.Dispatch<React.SetStateAction<LatLng>>;
+    setMarkerLocation: (location: LatLng) => void; // Custom handler type
 }
 
 const GoogleMapsComponent: React.FC<GoogleMapsComponentProps> = ({
-                                                                     center,
-                                                                     markerLocation,
-                                                                     setMarkerLocation,
-                                                                 }) => {
-    // Load Google Maps API
+    center,
+    markerLocation,
+    setMarkerLocation,
+}) => {
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: googleMapsConfig.apiKey, // Replace with your API key
-        libraries: ["places"], // Include required libraries
+        libraries: ["places"],
     });
 
-    // Ensure marker location is updated on map click
     const handleMapClick = (event: google.maps.MapMouseEvent) => {
         if (event.latLng) {
-            setMarkerLocation({
+            const newMarkerLocation = {
                 lat: event.latLng.lat(),
                 lng: event.latLng.lng(),
-            });
+            };
+
+            setMarkerLocation(newMarkerLocation); // Update marker location
         }
     };
 
@@ -54,14 +54,8 @@ const GoogleMapsComponent: React.FC<GoogleMapsComponentProps> = ({
             center={{ lat: center.lat, lng: center.lng }}
             onClick={handleMapClick}
         >
-            {/* Render marker at the current location */}
             {markerLocation.lat !== null && markerLocation.lng !== null && (
-                <Marker
-                    position={{
-                        lat: markerLocation.lat,
-                        lng: markerLocation.lng,
-                    }}
-                />
+                <Marker position={{ lat: markerLocation.lat, lng: markerLocation.lng }} />
             )}
         </GoogleMap>
     );

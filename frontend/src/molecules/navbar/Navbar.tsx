@@ -16,7 +16,7 @@ const Navbar: React.FC = () => {
         try {
             await signOut(auth);
             dispatch(logout());
-            navigate("/login");
+            navigate("/");
         } catch (error) {
             console.error("Error logging out:", error);
         }
@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <div className="container-fluid">
-                <picture className="navbar-brand">
+                <Link className="navbar-brand" to="/">
                     <div
                         style={{
                             height: "60px",
@@ -54,7 +54,7 @@ const Navbar: React.FC = () => {
                             }}
                         />
                     </div>
-                </picture>
+                </Link>
                 <button
                     className="navbar-toggler"
                     type="button"
