@@ -176,7 +176,7 @@ const ExplorePage: React.FC = () => {
                                                     <li
                                                         style="margin: 5px 0; cursor: pointer; background: #f1f1f1; padding: 8px; border-radius: 4px;"
                                                     >
-                                                        ${hobby}
+                                                        ${hobby.toLocaleUpperCase()}
                                                     </li>
                                                 `;
                                             });

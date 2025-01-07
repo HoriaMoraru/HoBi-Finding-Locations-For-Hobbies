@@ -70,7 +70,7 @@ public class FirebaseService {
     // END OF USERS
     // HOBBIES
     public boolean addHobby(String userId, UpdateHobbyRequest hobbyRequest) {
-        final String hobby = hobbyRequest.getHobby();
+        final String hobby = hobbyRequest.getHobby().trim().toLowerCase();
         try {
             Firestore db = FirestoreClient.getFirestore();
 
@@ -113,7 +113,7 @@ public class FirebaseService {
     }
 
     public boolean removeHobby(String userId, UpdateHobbyRequest hobbyRequest) {
-        final String hobby = hobbyRequest.getHobby();
+        final String hobby = hobbyRequest.getHobby().trim().toLowerCase();
         try {
             Firestore db = FirestoreClient.getFirestore();
 
@@ -256,6 +256,7 @@ public class FirebaseService {
 
     public boolean addLocationToSaved(String userId, String hobby, UpdateUserLocationRequest locationRequest) {
         final NamedLocation location = locationRequest.getLocation();
+        hobby = hobby.trim().toLowerCase();
         try {
             Firestore db = FirestoreClient.getFirestore();
 
@@ -339,7 +340,7 @@ public class FirebaseService {
             if (userPreference != null) {
                 Map<String, List<NamedLocation>> hobbyLocations = userPreference.getHobbyLocations();
                 List<NamedLocation> locations = hobbyLocations.entrySet().stream()
-                        .filter(entry -> entry.getKey().trim().toLowerCase().equals(hobby))
+                        .filter(entry -> entry.getKey().trim().equalsIgnoreCase(hobby.trim()))
                         .map(Map.Entry::getValue)
                         .findFirst()
                         .orElse(new ArrayList<>());
@@ -385,7 +386,7 @@ public class FirebaseService {
             // Return the saved locations list
             Map<String, List<NamedLocation>> hobbyLocations = user.getUserPreference().getHobbyLocations();
             List<NamedLocation> locations = hobbyLocations.entrySet().stream()
-                    .filter(entry -> entry.getKey().trim().toLowerCase().equals(hobby))
+                    .filter(entry -> entry.getKey().trim().equalsIgnoreCase(hobby.trim()))
                     .map(Map.Entry::getValue)
                     .findFirst()
                     .orElse(new ArrayList<>());

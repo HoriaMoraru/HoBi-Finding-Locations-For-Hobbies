@@ -45,14 +45,14 @@ const HobbiesTable: React.FC<HobbiesTableProps> = ({ hobbies, onDelete }) => {
                     <tr>
                         <th>#</th>
                         <th>Hobby</th>
-                        <th>Actions</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {hobbies.map((hobby, index) => (
                         <tr key={index}>
                             <td>{index + 1}</td>
-                            <td>{hobby}</td>
+                            <td>{hobby.toUpperCase()}</td>
                             <td>
                                 <button
                                     className="delete-button"

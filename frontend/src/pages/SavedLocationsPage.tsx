@@ -91,7 +91,7 @@ const SavedLocationsPage: React.FC = () => {
                         onClick={() => fetchSavedLocations(hobby)}
                         style={{ cursor: "pointer" }}
                     >
-                        {hobby}
+                        {hobby.toLocaleUpperCase()}
                     </li>
                 ))}
             </ul>
@@ -125,7 +125,7 @@ const SavedLocationsPage: React.FC = () => {
                     >
                         Close
                     </button>
-                    <h2>{selectedHobby}</h2>
+                    <h2>{selectedHobby?.toLocaleUpperCase()}</h2>
                     <SavedLocationsTable
                         locations={locations}
                         hobby={selectedHobby!}
