@@ -35,13 +35,12 @@ public class MapsService {
 
     public List<Location> fetchLocationsForHobby(Location userLocation, String hobby) {
         log.info(FETCH_START_LOG, hobby, userLocation);
-
         try {
             LatLng latlng = new LatLng(userLocation.getLat(), userLocation.getLng());
 
             PlacesSearchResponse response = PlacesApi.nearbySearchQuery(geoApiContext, latlng)
                     .radius(SEARCH_RADIUS)
-                    .keyword(hobby)
+                    .keyword(hobby.trim().toLowerCase())
                     .await();
 
             // Convert PlacesSearchResults into a list of Location objects

@@ -52,6 +52,7 @@ public class LocationController {
             Authentication authentication,
             @PathVariable("hobby") String hobby) {
 
+        log.info("Hit fetch endpoint!");
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -125,7 +126,7 @@ public class LocationController {
         }
     }
 
-    @GetMapping("/route")
+    @PostMapping("/route")
     public ResponseEntity<DirectionsRoute> getRoute(
             Authentication authentication,
             @RequestBody LocationRequest locationRequest) {

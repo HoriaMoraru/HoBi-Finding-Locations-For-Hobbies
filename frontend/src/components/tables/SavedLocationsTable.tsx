@@ -1,114 +1,146 @@
+// src/components/tables/SavedLocationsTable.tsx
+
 import React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import MapIcon from "@mui/icons-material/Map";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../config/firebaseConfig";
 
-interface NamedLocation {
-    lat: number;
-    lng: number;
-    name: string;
+export interface NamedLocation {
+  lat: number;
+  lng: number;
+  name: string;
 }
 
 interface SavedLocationsTableProps {
-    locations: NamedLocation[];
-    hobby: string; // Add the current hobby as a prop
-    onDelete: () => void; // Callback to refresh locations after deletion
+  locations: NamedLocation[];
+  hobby: string; // Current hobby
+  onDelete: () => void; // Callback to refresh locations after deletion
+  setSnackbar: React.Dispatch<
+    React.SetStateAction<{
+      open: boolean;
+      message: string;
+      severity: "success" | "error";
+    }>
+  >;
 }
 
-const SavedLocationsTable: React.FC<SavedLocationsTableProps> = ({ locations, hobby, onDelete }) => {
-    const navigate = useNavigate();
+const SavedLocationsTable: React.FC<SavedLocationsTableProps> = ({
+  locations,
+  hobby,
+  onDelete,
+  setSnackbar,
+}) => {
+  const navigate = useNavigate();
 
-    const handleDelete = async (index: number) => {
-        try {
-            const authToken = await auth.currentUser?.getIdToken();
+  const handleDelete = async (location: NamedLocation) => {
+    try {
+      const authToken = await auth.currentUser?.getIdToken();
 
-            const response = await fetch(
-                `http://localhost:8080/api/locations/remove/${hobby}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${authToken}`,
-                    },
-                    body: JSON.stringify({
-                        location: locations[index],
-                    }),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to delete location. Please try again later.");
-            }
-
-            onDelete(); // Refresh locations list after deletion
-        } catch (error) {
-            console.error("Error deleting location:", error);
-            alert("Failed to delete location. Please try again later.");
+      const response = await fetch(
+        `http://localhost:8080/api/locations/remove/${hobby}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            location: location,
+          }),
         }
-    };
+      );
 
-    const handleShowOnMap = (location: NamedLocation) => {
-        navigate("/explore", { state: { location } });
-    };
+      if (!response.ok) {
+        throw new Error("Failed to delete location. Please try again later.");
+      }
 
+      setSnackbar({
+        open: true,
+        message: "Location deleted successfully!",
+        severity: "success",
+      });
+      onDelete(); // Refresh locations list after deletion
+    } catch (error) {
+      console.error("Error deleting location:", error);
+      setSnackbar({
+        open: true,
+        message: "Failed to delete location. Please try again later.",
+        severity: "error",
+      });
+    }
+  };
+
+  const handleShowOnMap = (location: NamedLocation) => {
+    navigate("/explore", { state: { location } });
+  };
+
+  if (locations.length === 0) {
     return (
-        <div className="table-container">
-            <table className="custom-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {locations.map((location, index) => (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{location.name}</td>
-                            <td>{location.lat || "N/A"}</td>
-                            <td>{location.lng || "N/A"}</td>
-                            <td>
-                                <button
-                                    className="show-map-button"
-                                    onClick={() => handleShowOnMap(location)}
-                                    style={{
-                                        backgroundColor: "#007bff",
-                                        border: "none",
-                                        color: "#fff",
-                                        padding: "5px 10px",
-                                        borderRadius: "5px",
-                                        cursor: "pointer",
-                                    }}
-                                    title="Show on Map"
-                                >
-                                    Show on Map
-                                </button>
-                            </td>
-                            <td>
-                                <button
-                                    className="delete-button"
-                                    onClick={() => handleDelete(index)}
-                                    style={{
-                                        backgroundColor: "transparent",
-                                        border: "none",
-                                        color: "red",
-                                        fontSize: "20px",
-                                        cursor: "pointer",
-                                    }}
-                                    title="Remove Location"
-                                >
-                                    &#x2716;
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+      <Typography variant="body1" align="center">
+        No saved locations for {hobby.toUpperCase()}.
+      </Typography>
     );
+  }
+
+  return (
+    <TableContainer component={Paper} sx={{ mt: 2 }}>
+      <Table aria-label="saved locations table">
+        <TableHead>
+          <TableRow>
+            <TableCell>#</TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Latitude</TableCell>
+            <TableCell>Longitude</TableCell>
+            <TableCell align="center">Map</TableCell>
+            <TableCell align="center">Delete</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {locations.map((location, index) => (
+            <TableRow key={index}>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{location.name}</TableCell>
+              <TableCell>{location.lat || "N/A"}</TableCell>
+              <TableCell>{location.lng || "N/A"}</TableCell>
+              <TableCell align="center">
+                <Tooltip title="Show on Map">
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleShowOnMap(location)}
+                  >
+                    <MapIcon />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
+              <TableCell align="center">
+                <Tooltip title="Delete">
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDelete(location)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
 };
 
 export default SavedLocationsTable;

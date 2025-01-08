@@ -1,48 +1,151 @@
-// src/components/LeftPanel.tsx
-
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import MenuButton from "../buttons/MenuButton";
+import { auth } from "../../config/firebaseConfig";
+import { toast } from "react-toastify";
+import { useAppDispatch } from "../../store/hooks"
+import { fetchHobbyLocations } from "../../store/mapSlice"; // import the thunk
+import "./LeftPanel.css";
+import savedLocationsIcon from '../../assets/images/saved.png';
+import hobbiesIcon from '../../assets/images/hobbies-logo.png';
+import mapIcon from '../../assets/images/map-logo.png';
+import findIcon from '../../assets/images/search-logo.png';
 
 const LeftPanel: React.FC = () => {
-    const location = useLocation();
+  const location = useLocation();
+  const dispatch = useAppDispatch();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hobbies, setHobbies] = useState<string[]>([]);
+  const [isHobbiesOpen, setIsHobbiesOpen] = useState(false);
 
-    return (
-        <div className="left-panel">
-            <Link
-                to="/explore/saved-locations"
-                className={`btn w-100 mb-3 ${
-                    location.pathname === "/explore/saved-locations"
-                        ? "btn-primary"
-                        : "btn-outline-primary"
-                }`}
-                aria-label="Navigate to Saved Locations"
+  const handleToggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
+
+  // Fetch user hobbies
+  const handleFetchHobbies = async () => {
+    try {
+      const authToken = await auth.currentUser?.getIdToken();
+      if (!authToken) {
+        toast.error("User not authenticated. Please log in again.");
+        return;
+      }
+      const response = await fetch("http://localhost:8080/api/hobbies", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        toast.error("Failed to fetch hobbies");
+        return;
+      }
+
+      const data = await response.json();
+      setHobbies(data);
+
+      if (data.length === 0) {
+        toast.info("Please add hobbies first!");
+      }
+
+      // Toggle show/hide of hobbies dropdown
+      setIsHobbiesOpen((prev) => !prev);
+    } catch (error) {
+      console.error("Error fetching hobbies:", error);
+      toast.error("Error fetching hobbies");
+    }
+  };
+
+  // Handle button click for hobbies
+  const handleHobbyClick = async (hobby: string) => {
+    try {
+
+      const resultAction = await dispatch(fetchHobbyLocations(hobby));
+      if (fetchHobbyLocations.rejected.match(resultAction)) {
+        toast.error("Failed to fetch locations for " + hobby);
+      } else {
+        toast.success(`Fetched locations for ${hobby}!`);
+      }
+    } catch (error) {
+      console.error("Error fetching hobbies:", error);
+      toast.error("Error fetching hobbies");
+    }
+  };
+
+  return (
+    <div className="left-panel p-2">
+      <MenuButton onClick={handleToggleMenu} />
+
+      {isMenuOpen && (
+        <div className="d-flex flex-column gap-3 justify-content-around mt-3">
+          <Link
+            to="/explore/saved-locations"
+            className={`btn ${
+              location.pathname === "/explore/saved-locations"
+                ? "btn-success"
+                : "btn-outline-success"
+            }`}
+              data-tooltip="Saved Locations"
+          >
+
+            <img src={savedLocationsIcon} alt="Saved Locations" className="btn-icon" />
+          </Link>
+
+          <Link
+            to="/explore/hobbies"
+            className={`btn ${
+              location.pathname === "/explore/hobbies"
+                ? "btn-success"
+                : "btn-outline-success"
+            }`}
+              data-tooltip="My Hobbies"
+          >
+            <img src={hobbiesIcon} alt="Hobbies" className="btn-icon" />
+          </Link>
+
+          <Link
+            to="/explore"
+            className={`btn ${
+              location.pathname === "/explore" ? "btn-primary" : "btn-outline-primary"
+            }`}
+              data-tooltip="Explore Map"
+          >
+            <img src={mapIcon} alt="Map" className="btn-icon" />
+          </Link>
+
+          {location.pathname === "/explore" && (
+            <button onClick={handleFetchHobbies} className="btn btn-info">
+              <img src={findIcon} alt="Find" className="btn-icon" />
+            </button>
+          )}
+
+          {isHobbiesOpen && hobbies.length > 0 && location.pathname === "/explore" && (
+            <div
+              className="mt-2"
+              style={{
+                maxHeight: "180px",
+                overflowY: "auto",
+                overflowX: "hidden",
+              }}
             >
-                Saved Locations
-            </Link>
-            <Link
-                to="/explore/hobbies"
-                className={`btn w-100 ${
-                    location.pathname === "/explore/hobbies"
-                        ? "btn-secondary"
-                        : "btn-outline-secondary"
-                }`}
-                aria-label="Navigate to Hobbies"
-            >
-                Hobbies
-            </Link>
-            <Link
-                to="/explore"
-                className={`btn w-100 ${
-                    location.pathname === "/explore"
-                        ? "btn-secondary"
-                        : "btn-outline-secondary"
-                }`}
-                aria-label="Navigate to Map"
-            >
-                Map
-            </Link>
+              <ul className="list-group hobby-list">
+                {hobbies.map((hobby) => (
+                  <button
+                    key={hobby}
+                    className="list-group-item hobby-item"
+                    onClick={() => handleHobbyClick(hobby)}
+                  >
+                    {hobby.toLocaleUpperCase()}
+                  </button>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default LeftPanel;

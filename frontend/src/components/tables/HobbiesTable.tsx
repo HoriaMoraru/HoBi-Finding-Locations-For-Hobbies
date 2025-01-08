@@ -1,72 +1,100 @@
-import React, { useEffect } from "react";
-import "./HobbiesTable.css";
+// src/components/tables/HobbiesTable.tsx
+import React, { useState } from "react";
 import { auth } from "../../config/firebaseConfig";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface HobbiesTableProps {
-    hobbies: string[];
-    onDelete: () => void; // Callback to refresh hobbies after deletion
+  hobbies: string[];
+  onDelete: () => void; // Callback to refresh hobbies after deletion
 }
 
 const HobbiesTable: React.FC<HobbiesTableProps> = ({ hobbies, onDelete }) => {
-    // Handle delete
-    const handleDelete = async (index: number) => {
-        try {
-            const authToken = await auth.currentUser?.getIdToken();
-            const response = await fetch("http://localhost:8080/api/hobbies", {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${authToken}`,
-                },
-                body: JSON.stringify({
-                    hobby: hobbies[index],
-                }),
-            });
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-            if (!response.ok) {
-                throw new Error("Failed to delete hobby. Please try again later.");
-            }
+  // Handle delete
+  const handleDelete = async (hobby: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${hobby}"?`)) {
+      return;
+    }
 
-            onDelete(); // Refresh hobbies list after deletion
-        } catch (error) {
-            console.error("Error deleting hobby:", error);
-            alert("Failed to delete hobby. Please try again later.");
-        }
-    };
+    try {
+      setIsDeleting(true);
+      const authToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("http://localhost:8080/api/hobbies", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          hobby: hobby,
+        }),
+      });
 
-    useEffect(() => {
-        // Effect runs when the length of hobbies changes
-    }, [hobbies.length]);
+      if (!response.ok) {
+        throw new Error("Failed to delete hobby.");
+      }
 
+      onDelete(); // Refresh hobbies list after deletion
+    } catch (error) {
+      console.error("Error deleting hobby:", error);
+      alert("Failed to delete hobby. Please try again later.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (hobbies.length === 0) {
     return (
-        <div className="table-container">
-            <table className="custom-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Hobby</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {hobbies.map((hobby, index) => (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{hobby.toUpperCase()}</td>
-                            <td>
-                                <button
-                                    className="delete-button"
-                                    onClick={() => handleDelete(index)}
-                                >
-                                    X
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+      <Typography variant="body1" align="center">
+        No hobbies found. Please add a hobby.
+      </Typography>
     );
+  }
+
+  return (
+    <TableContainer component={Paper}>
+      <Table aria-label="hobbies table">
+        <TableHead>
+        </TableHead>
+        <TableBody>
+          {hobbies.map((hobby, index) => (
+            <TableRow key={index}>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>
+                <Typography variant="body1" sx={{ textTransform: "uppercase" }}>
+                  {hobby}
+                </Typography>
+              </TableCell>
+              <TableCell align="center">
+                <Tooltip title="Delete Hobby">
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDelete(hobby)}
+                    disabled={isDeleting}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
 };
 
 export default HobbiesTable;

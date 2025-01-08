@@ -1,0 +1,10 @@
+.explore-page {
+    display: flex;
+    flex: 1;
+    height: 100%;
+  }
+
+  .map-container {
+    flex: 1; /* fill the remaining space to show the map */
+    position: relative;
+  }

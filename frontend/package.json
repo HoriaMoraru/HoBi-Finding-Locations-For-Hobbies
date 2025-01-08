@@ -10,6 +10,11 @@
     "start": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@googlemaps/polyline-codec": "^1.0.28",
+    "@mui/icons-material": "^6.3.1",
+    "@mui/material": "^6.3.1",
     "@react-google-maps/api": "^2.20.5",
     "@reduxjs/toolkit": "^2.5.0",
     "bootstrap": "^5.3.3",
@@ -20,12 +25,14 @@
     "react-modal": "^3.16.3",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.1",
+    "react-select": "^5.9.0",
     "react-toastify": "^11.0.2",
     "use-places-autocomplete": "^4.0.1",
     "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

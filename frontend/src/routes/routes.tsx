@@ -6,7 +6,7 @@ import PrivateRoute from "./PrivateRoute";
 import MainPage from "../pages/MainPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
-import ExplorePage from "../pages/ExplorePage";
+import ExplorePage from "../pages/ExplorePage/ExplorePage.tsx";
 import AuthLayout from "../organisms/layouts/AuthLayout.tsx";
 import HobbiesPage from "../pages/HobbiesPage.tsx";
 import SavedLocationsPage from "../pages/SavedLocationsPage.tsx";

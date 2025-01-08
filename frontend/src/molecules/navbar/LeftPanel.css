@@ -1,0 +1,80 @@
+/* LeftPanel.css */
+
+/* Make each hobby smaller */
+.hobby-item {
+  background-color: #55a76a !important; /* green background */
+    color: #fff;
+    border: none;             /* remove default list-group border */
+    border-radius: 4px;
+    margin-bottom: 6px;       /* space between items */
+    font-size: 0.7rem;        /* smaller text */
+    padding: 0.25rem 0.5rem;  /* smaller padding */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  /* On hover, slightly darker green, no transform so the bottom bar won't appear */
+  .hobby-item:hover {
+    background-color: #218838;
+  }
+/* General button styling */
+.left-panel .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px; /* Slightly smaller width */
+    height: 50px; /* Slightly smaller height */
+    padding: 0; /* No padding */
+    border: none; /* Remove borders */
+    border-radius: 8px; /* Optional: rounded corners */
+    background-color: transparent; /* Transparent background */
+    overflow: hidden; /* Ensure content doesn't spill outside */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Hover effects */
+  }
+
+  .left-panel .btn:hover {
+    transform: scale(1.1); /* Slight hover zoom */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
+  }
+
+  /* Button-specific colors */
+  .btn-success {
+    background-color: #f0fdf4; /* Light green */
+  }
+
+  .btn-primary {
+    background-color: #f0f4ff; /* Light blue */
+  }
+
+  .btn-info {
+    background-color: #eaf7fc; /* Light cyan */
+  }
+
+  /* Icon styling */
+  .btn-icon {
+    width: 100%; /* Scale icon to fit button width */
+    height: 100%; /* Scale icon to fit button height */
+    object-fit: cover; /* Ensure the icon fills the button area */
+    object-position: center; /* Center the image within the button */
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1)); /* Optional shadow for icons */
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .left-panel .btn {
+      width: 40px; /* Smaller button width */
+      height: 40px; /* Smaller button height */
+    }
+
+    .btn-icon {
+        width: 80%; /* Occupy 80% of the button's width */
+        height: auto; /* Maintain aspect ratio */
+        object-fit: contain; /* Ensure the entire icon fits within the button */
+        object-position: center; /* Center the icon */
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1)); /* Optional shadow for icons */
+      }
+  }
+
+
+
+

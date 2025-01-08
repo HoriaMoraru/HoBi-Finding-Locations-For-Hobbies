@@ -1,52 +1,84 @@
+// src/components/modals/AddHobbyModal.tsx
+
 import React, { useState } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  IconButton,
+  Box,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface AddHobbyModalProps {
-    onClose: () => void;
-    onAdd: (newHobby: string) => void;
+  open: boolean;
+  onClose: () => void;
+  onAdd: (newHobby: string) => void;
 }
 
-const AddHobbyModal: React.FC<AddHobbyModalProps> = ({ onClose, onAdd }) => {
-    const [newHobby, setNewHobby] = useState("");
+const AddHobbyModal: React.FC<AddHobbyModalProps> = ({ open, onClose, onAdd }) => {
+  const [hobby, setHobby] = useState<string>("");
 
-    const handleAdd = () => {
-        if (newHobby.trim() !== "") {
-            onAdd(newHobby.trim());
-        }
-    };
+  const handleAdd = () => {
+    if (hobby.trim() === "") {
+      alert("Hobby cannot be empty.");
+      return;
+    }
+    onAdd(hobby.trim());
+    setHobby("");
+  };
 
-    return (
-        <div className="modal d-block">
-            <div className="modal-dialog">
-                <div className="modal-content">
-                    <div className="modal-header">
-                        <h5 className="modal-title">Add New Hobby</h5>
-                        <button
-                            type="button"
-                            className="btn-close"
-                            onClick={onClose}
-                        ></button>
-                    </div>
-                    <div className="modal-body">
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter hobby"
-                            value={newHobby}
-                            onChange={(e) => setNewHobby(e.target.value)}
-                        />
-                    </div>
-                    <div className="modal-footer">
-                        <button className="btn btn-secondary" onClick={onClose}>
-                            Cancel
-                        </button>
-                        <button className="btn btn-success" onClick={handleAdd}>
-                            Add
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+  const handleClose = () => {
+    onClose();
+    setHobby("");
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+      <DialogTitle>
+        Add New Hobby
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent>
+        <Box component="form" noValidate autoComplete="off" sx={{ mt: 2 }}>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Hobby"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={hobby}
+            onChange={(e) => setHobby(e.target.value)}
+          />
+        </Box>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={handleClose} color="secondary">
+          Cancel
+        </Button>
+        <Button onClick={handleAdd} variant="contained" color="primary">
+          Add
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 };
 
 export default AddHobbyModal;
