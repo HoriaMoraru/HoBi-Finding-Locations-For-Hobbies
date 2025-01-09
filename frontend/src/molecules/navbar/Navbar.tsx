@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
@@ -6,11 +6,14 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../config/firebaseConfig";
 import { useNavigate, Link } from "react-router-dom";
 import HobiLogo from "../../assets/images/hobi-logo.png";
+import { Avatar, Menu, MenuItem, IconButton, Tooltip } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout"; // Material-UI Logout Icon
 
 const Navbar: React.FC = () => {
     const { user, loading } = useSelector((state: RootState) => state.auth); // Get user from Redux state
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     const handleLogout = async () => {
         try {
@@ -20,6 +23,14 @@ const Navbar: React.FC = () => {
         } catch (error) {
             console.error("Error logging out:", error);
         }
+    };
+
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
     };
 
     if (loading) {
@@ -41,6 +52,7 @@ const Navbar: React.FC = () => {
                             height: "60px",
                             width: "60px",
                             overflow: "hidden",
+                            marginLeft: "-8px",
                         }}
                     >
                         <img
@@ -49,8 +61,8 @@ const Navbar: React.FC = () => {
                             style={{
                                 height: "100%",
                                 width: "100%",
-                                objectFit: "cover", // Ensures the image fills the container
-                                objectPosition: "center", // Centers the image
+                                objectFit: "cover",
+                                objectPosition: "center",
                             }}
                         />
                     </div>
@@ -72,20 +84,51 @@ const Navbar: React.FC = () => {
                 >
                     <div className="d-flex align-items-center">
                         {user?.email ? (
-                            <>
-                                <span className="me-3">{user.email}</span>
-                                <button
-                                    className="btn btn-outline-danger"
-                                    onClick={handleLogout}
+                            <div className="d-flex align-items-center">
+                                {/* User Avatar Button */}
+                                <Tooltip title="Account settings">
+                                    <IconButton onClick={handleMenuOpen}>
+                                        <Avatar alt={user.email} src="/broken-image.jpg" />
+                                    </IconButton>
+                                </Tooltip>
+
+                                {/* Dropdown Menu */}
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleMenuClose}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "right",
+                                    }}
+                                    transformOrigin={{
+                                        vertical: "top",
+                                        horizontal: "right",
+                                    }}
                                 >
-                                    Log out
-                                </button>
-                            </>
-                        ) : (
+                                    <MenuItem disabled>{user.email}</MenuItem>
+                                </Menu>
+
+                                {/* Logout Icon Button */}
+                                <Tooltip title="Log out">
+                                <IconButton
+                                    onClick={handleLogout}
+                                    className="ms-3"
+                                    color="error"
+                                    style={{
+                                        fontSize: "1.5rem", // Adjust size here
+                                    }}
+                                >
+                                    <LogoutIcon style={{ fontSize: "2rem" }} /> {/* Adjust icon size */}
+                                </IconButton>
+                            </Tooltip>
+                            </div>
+                            ) :
+                            (
                             <Link className="btn btn-primary" to="/login">
                                 Log in
                             </Link>
-                        )}
+                            )}
                     </div>
                 </div>
             </div>
