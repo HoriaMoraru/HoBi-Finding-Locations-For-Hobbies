@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import RegisterComponent from "../components/forms/RegisterComponent";
-import RegisterImage from "../assets/images/register-page.jpg";
+import RegisterImage from "../assets/images/register-page-real.jpg";
 import LogoImage from "../assets/images/hobi-logo.png"; // Add your logo image path
 import { Link } from "react-router-dom"; // Import Link
 

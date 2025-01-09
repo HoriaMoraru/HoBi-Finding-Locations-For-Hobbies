@@ -3,7 +3,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
 import { auth } from "../config/firebaseConfig.ts";
 import LoginComponent from "../components/forms/LoginComponent";
-import LoginImage from "../assets/images/login-page.jpg";
+import LoginImage from "../assets/images/login-page-real.jpg";
 import LogoImage from "../assets/images/hobi-logo.png"; // Add your logo image path
 import { useEffect, useState } from "react";
 import { loginSuccess } from "../store/authSlice.ts";
