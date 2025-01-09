@@ -226,44 +226,17 @@ const MapContainer: React.FC = () => {
 
                 // Render the InfoWindow content
                 infoWindow.setContent(`
-                    <div style="
-                      padding: 15px;
-                      text-align: center;
-                      border-radius: 10px;
-                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                      font-family: Arial, sans-serif;
-                      background-color: #fff;
-                    ">
-                      <h3 style="margin: 5px 0; font-size: 18px; color: #333;">${name}</h3>
-                      <div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
-                        <button id="${saveButtonId}" style="
-                          padding: 10px 15px;
-                          background-color: #007bff;
-                          color: #fff;
-                          border: none;
-                          border-radius: 5px;
-                          cursor: pointer;
-                          font-size: 14px;
-                          transition: background-color 0.3s ease;
-                        " onmouseover="this.style.backgroundColor='#0056b3'" onmouseout="this.style.backgroundColor='#007bff'">
-                          Save Location
-                        </button>
-                        <button id="${showRouteButtonId}" style="
-                          padding: 10px 15px;
-                          background-color: #28a745;
-                          color: #fff;
-                          border: none;
-                          border-radius: 5px;
-                          cursor: pointer;
-                          font-size: 14px;
-                          transition: background-color 0.3s ease;
-                        " onmouseover="this.style.backgroundColor='#1e7e34'" onmouseout="this.style.backgroundColor='#28a745'">
-                          Show Route
-                        </button>
-                      </div>
-                      <div id="${hobbiesContainerId}" style="margin-top: 10px; display: none;"></div>
-                    </div>
-                  `);
+                  <div style="padding: 10px; text-align: center;">
+                    <h3 style="margin: 5px;">${name}</h3>
+                    <button id="${saveButtonId}" style="padding: 8px 12px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+                      Save Location
+                    </button>
+                  <button id="${showRouteButtonId}" style="margin-top: 10px; padding: 8px 12px; background-color: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+                    Show Route
+                  </button>
+                    <div id="${hobbiesContainerId}" style="margin-top: 10px; display: none;"></div>
+                  </div>
+                `);
                 infoWindow.setPosition(position);
                 infoWindow.open(map);
 
