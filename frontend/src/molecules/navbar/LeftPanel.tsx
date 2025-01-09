@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import MenuButton from "../buttons/MenuButton";
+import Select from "react-select";
 import { auth } from "../../config/firebaseConfig";
 import { toast } from "react-toastify";
 import { useAppDispatch } from "../../store/hooks"
@@ -119,28 +120,36 @@ const LeftPanel: React.FC = () => {
             </button>
           )}
 
-          {isHobbiesOpen && hobbies.length > 0 && location.pathname === "/explore" && (
-            <div
-              className="mt-2"
-              style={{
-                maxHeight: "180px",
-                overflowY: "auto",
-                overflowX: "hidden",
-              }}
-            >
-              <ul className="list-group hobby-list">
-                {hobbies.map((hobby) => (
-                  <button
-                    key={hobby}
-                    className="list-group-item hobby-item"
-                    onClick={() => handleHobbyClick(hobby)}
-                  >
-                    {hobby.toLocaleUpperCase()}
-                  </button>
-                ))}
-              </ul>
-            </div>
-          )}
+            {isHobbiesOpen && hobbies.length > 0 && (
+            <Select
+                options={hobbies.map((hobby) => ({ label: hobby.toUpperCase(), value: hobby }))}
+                onChange={(selectedOption) => {
+                if (selectedOption?.value) {
+                    handleHobbyClick(selectedOption.value);
+                }
+                }}
+                placeholder="Select a hobby..."
+                styles={{
+                control: (base) => ({
+                    ...base,
+                    borderRadius: "8px",
+                    borderColor: "#ccc",
+                    padding: "2px", // Reduce padding for a compact design
+                }),
+                option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused ? "#4caf50" : "#fff",
+                    color: state.isFocused ? "#fff" : "#000",
+                    textTransform: "uppercase", // Ensure options are in uppercase
+                    fontSize: "12px", // Smaller font size
+                }),
+                menu: (base) => ({
+                    ...base,
+                    width: "180px", // Narrow dropdown width
+                }),
+                }}
+            />
+            )}
         </div>
       )}
     </div>
