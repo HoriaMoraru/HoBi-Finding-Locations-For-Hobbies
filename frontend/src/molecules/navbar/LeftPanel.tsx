@@ -120,7 +120,7 @@ const LeftPanel: React.FC = () => {
             </button>
           )}
 
-            {isHobbiesOpen && hobbies.length > 0 && (
+            {isHobbiesOpen && hobbies.length > 0 && location.pathname === "/explore" && (
             <Select
                 options={hobbies.map((hobby) => ({ label: hobby.toUpperCase(), value: hobby }))}
                 onChange={(selectedOption) => {
