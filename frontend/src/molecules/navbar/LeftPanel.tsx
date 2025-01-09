@@ -103,16 +103,15 @@ const LeftPanel: React.FC = () => {
           >
             <img src={hobbiesIcon} alt="Hobbies" className="btn-icon" />
           </Link>
-
           <Link
             to="/explore"
             className={`btn ${
-              location.pathname === "/explore" ? "btn-primary" : "btn-outline-primary"
+                location.pathname === "/explore" ? "btn-primary" : "btn-outline-primary"
             }`}
-              data-tooltip="Explore Map"
-          >
+            data-tooltip="Explore Map"
+            >
             <img src={mapIcon} alt="Map" className="btn-icon" />
-          </Link>
+           </Link>
 
           {location.pathname === "/explore" && (
             <button onClick={handleFetchHobbies} className="btn btn-info">
